@@ -1,0 +1,68 @@
+# =========================
+# Node / Vite / React
+# =========================
+node_modules/
+dist/
+dist-ssr/
+build/
+out/
+.vite/
+.vite-inspect/
+
+# local env files
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# coverage / test outputs
+coverage/
+*.lcov
+
+# =========================
+# pnpm
+# =========================
+.pnpm-store/
+.pnpm-debug.log*
+
+# (Keep pnpm-lock.yaml in repo — do NOT ignore it)
+
+# =========================
+# PHP / Composer
+# =========================
+vendor/
+composer.phar
+composer.lock
+.phpunit.result.cache
+phpunit.cache/
+
+# Laravel / Symfony (if applicable extras)
+storage/logs/
+storage/framework/
+bootstrap/cache/
+
+# =========================
+# OS / Editor / IDE
+# =========================
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Misc
+# =========================
+*.tmp
+*.cache
