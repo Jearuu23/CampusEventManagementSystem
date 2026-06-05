@@ -1,4 +1,6 @@
 import type { Route } from "../+types/home";
+import RouteHandler from "../RouteHandler";
+import { UserRole } from "~/types/user";
 import { default as EventManagementPage } from "~/pages/admin/eventManagement/EventManagement";
 
 export function meta({}: Route.MetaArgs) {
@@ -6,5 +8,9 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function EventManagement() {
-	return <EventManagementPage />;
+	return (
+		<RouteHandler role={UserRole.ADMIN}>
+			<EventManagementPage />
+		</RouteHandler>
+	);
 }

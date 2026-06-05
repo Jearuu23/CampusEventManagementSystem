@@ -1,5 +1,6 @@
 import type { Route } from "../+types/home";
-import { AdminRoute } from "./AdminRoute";
+import RouteHandler from "../RouteHandler";
+import { UserRole } from "~/types/user";
 import { default as AdminDashboardPage } from "~/pages/admin/dashboard/Dashboard";
 
 export function meta({}: Route.MetaArgs) {
@@ -8,8 +9,8 @@ export function meta({}: Route.MetaArgs) {
 
 export default function AdminDashboard() {
 	return (
-		<AdminRoute>
+		<RouteHandler role={UserRole.ADMIN}>
 			<AdminDashboardPage />
-		</AdminRoute>
+		</RouteHandler>
 	);
 }

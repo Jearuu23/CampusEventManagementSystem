@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-
-export type UserRole = "guest" | "student" | "admin";
+import { UserRole } from "~/types/user";
 
 interface AuthContextType {
 	userRole: UserRole;
@@ -11,10 +10,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-	const [userRole, setUserRole] = useState<UserRole>("guest");
+	const [userRole, setUserRole] = useState<UserRole>(UserRole.USER);
 
 	const logout = () => {
-		setUserRole("guest");
+		setUserRole(UserRole.USER);
 	};
 
 	return <AuthContext.Provider value={{ userRole, setUserRole, logout }}>{children}</AuthContext.Provider>;
