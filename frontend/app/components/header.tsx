@@ -4,12 +4,12 @@ import { useAuth } from "~/contexts/auth/AuthContext";
 import { UserRole } from "~/types/user";
 
 export default function Header() {
-	const { userRole, setUserRole } = useAuth();
+	const { userRole, logout } = useAuth();
 	const [isOpen, setIsOpen] = useState(false);
 	const navigate = useNavigate();
 
-	const handleLogout = () => {
-		setUserRole(UserRole.USER);
+	const handleLogout = async () => {
+		await logout();
 		navigate("/");
 	};
 

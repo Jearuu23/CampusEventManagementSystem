@@ -2,19 +2,31 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { UserRole } from "~/types/user";
+import { LoginUser } from "~/api/user";
 
 export default function Login() {
-	const { setUserRole } = useAuth();
+	const { login } = useAuth();
 	const navigate = useNavigate();
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [role, setRole] = useState<string>("admin");
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setUserRole(UserRole.ADMIN);
-		navigate("/dashboard");
+		try {
+			const data = await LoginUser({ email, password });
+
+			if (data.success) {
+				// Update context state and localStorage
+				login(data.user.role as UserRole);
+				navigate("/dashboard");
+			} else {
+				alert(data.message || "Login failed");
+			}
+		} catch (error) {
+			console.error("Error logging in:", error);
+			alert("An error occurred while communicating with the server.");
+		}
 	};
 
 	return (

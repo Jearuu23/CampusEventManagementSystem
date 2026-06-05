@@ -1,10 +1,8 @@
 <?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: POST");
-
+include_once "../core/header.php";
 include "../../database/db.php";
+
+session_start();
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -21,28 +19,53 @@ if (
 	exit;
 }
 
-$first_name = $conn->real_escape_string($data["first_name"]);
-$last_name = $conn->real_escape_string($data["last_name"]);
-$email = $conn->real_escape_string($data["email"]);
+$first_name = trim($data["first_name"]);
+$last_name = trim($data["last_name"]);
+$email = trim($data["email"]);
 $password = password_hash($data["password"], PASSWORD_BCRYPT);
-$organization = isset($data["organization"]) ? $conn->real_escape_string($data["organization"]) : null;
-$role = isset($data["role"]) ? $conn->real_escape_string($data["role"]) : "organizer";
+$organization = $data["organization"] ?? null;
+$role = $data["role"] ?? "organizer";
 
-// Check if email exists
-$check = $conn->query("SELECT id FROM users WHERE email='$email'");
-if ($check->num_rows > 0) {
+$checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$checkStmt->bind_param("s", $email);
+$checkStmt->execute();
+$result = $checkStmt->get_result();
+
+if ($result->num_rows > 0) {
 	echo json_encode([
 		"success" => false,
 		"message" => "Email already exists"
 	]);
+
+	$checkStmt->close();
+	$conn->close();
 	exit;
 }
 
-// Insert user
-$sql = "INSERT INTO users (first_name, last_name, email, password, organization, role)
-        VALUES ('$first_name', '$last_name', '$email', '$password', '$organization', '$role')";
+$checkStmt->close();
 
-if ($conn->query($sql)) {
+$insertStmt = $conn->prepare("
+    INSERT INTO users (
+        first_name,
+        last_name,
+        email,
+        password,
+        organization,
+        role
+    ) VALUES (?, ?, ?, ?, ?, ?)
+");
+
+$insertStmt->bind_param(
+	"ssssss",
+	$first_name,
+	$last_name,
+	$email,
+	$password,
+	$organization,
+	$role
+);
+
+if ($insertStmt->execute()) {
 	echo json_encode([
 		"success" => true,
 		"message" => "User registered successfully"
@@ -50,9 +73,9 @@ if ($conn->query($sql)) {
 } else {
 	echo json_encode([
 		"success" => false,
-		"message" => "Registration failed",
-		"error" => $conn->error
+		"message" => "Registration failed"
 	]);
 }
 
+$insertStmt->close();
 $conn->close();

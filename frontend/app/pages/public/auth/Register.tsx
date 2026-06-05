@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "~/contexts/auth/AuthContext";
-import { UserRole } from "~/types/user";
+import { RegisterOrganizer } from "~/api/user";
 
 export default function Register() {
-	const { setUserRole } = useAuth();
 	const navigate = useNavigate();
 
 	const [firstName, setFirstName] = useState("");
@@ -13,10 +11,26 @@ export default function Register() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setUserRole(UserRole.ORGANIZER);
-		navigate("/dashboard");
+		try {
+			const data = await RegisterOrganizer({
+				first_name: firstName,
+				last_name: lastName,
+				email,
+				password,
+				organization: org,
+			});
+			if (data.success) {
+				alert("Registration successful! Please login.");
+				navigate("/login");
+			} else {
+				alert(data.message || "Registration failed");
+			}
+		} catch (error) {
+			console.error("Error registering:", error);
+			alert("An error occurred while communicating with the server.");
+		}
 	};
 
 	return (
