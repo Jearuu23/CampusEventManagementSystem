@@ -1,22 +1,24 @@
 import { type RouteConfig, index, route } from "@react-router/dev/routes";
+import { routeLinks } from "./constants";
 
 const publicRoute = "routes/public/";
 const adminRoute = "routes/admin/";
 
 const appRoutes = {
 	// Public
-	home: { path: "/", component: publicRoute + "home.tsx" },
-	about: { path: "/about", component: publicRoute + "about.tsx" },
-	eventListng: { path: "/event-listing", component: publicRoute + "eventListing.tsx" },
-	login: { path: "/login", component: publicRoute + "login.tsx" },
-	register: { path: "/register", component: publicRoute + "register.tsx" },
-	eventRegistration: { path: "/event/:id", component: publicRoute + "event.$id.tsx" },
+	home: { path: routeLinks.home, component: publicRoute + "home.tsx" },
+	about: { path: routeLinks.about, component: publicRoute + "about.tsx" },
+	eventListing: { path: routeLinks.eventListing, component: publicRoute + "eventListing.tsx" },
+	login: { path: routeLinks.login, component: publicRoute + "login.tsx" },
+	register: { path: routeLinks.register, component: publicRoute + "register.tsx" },
+	eventRegistration: { path: routeLinks.eventRegistration, component: publicRoute + "event.$id.tsx" },
 	// forgotPassword: publicRoute + "forgotPassword.tsx",
 
 	// Admin / Organizer
-	dashboard: { path: "/dashboard", component: adminRoute + "dashboard.tsx" },
-	eventManagement: { path: "/event-management", component: adminRoute + "eventManagement.tsx" },
-	participantManagement: { path: "/participant-management", component: adminRoute + "participantManagement.tsx" },
+	dashboard: { path: routeLinks.adminDashboard, component: adminRoute + "dashboard.tsx" },
+	eventManagement: { path: routeLinks.adminEventManagement, component: adminRoute + "eventManagement.tsx" },
+	participantManagement: { path: routeLinks.adminParticipantManagement, component: adminRoute + "participantManagement.tsx" },
+	ViewEvent: { path: routeLinks.adminViewEvent, component: adminRoute + "viewEvent.$id.tsx" },
 };
 
 const routes = [];

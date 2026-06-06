@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router";
 import { GetEvents, UpdateEventStatus, DeleteEvent } from "~/api/events";
+import { routeLinks } from "~/constants";
 
 export default function EventsTab() {
 	const [filter, setFilter] = useState("all");
+	const [searchQuery, setSearchQuery] = useState("");
 	const [events, setEvents] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -38,11 +41,24 @@ export default function EventsTab() {
 		}
 	};
 
-	const filteredEvents = filter === "all" ? events : events.filter((e) => e.status === filter);
+	const filteredEvents = events.filter((e) => {
+		const matchesStatus = filter === "all" || e.status === filter;
+		const searchLower = searchQuery.toLowerCase();
+		const matchesSearch = !searchQuery || e.title?.toLowerCase().includes(searchLower) || e.department?.toLowerCase().includes(searchLower);
+
+		return matchesStatus && matchesSearch;
+	});
 
 	return (
 		<div className="fade-in-element">
-			<div className="flex gap-4 mb-6">
+			<div className="flex flex-col sm:flex-row gap-4 mb-6">
+				<input
+					type="text"
+					placeholder="Search by title or department..."
+					className="bg-transparent border border-border p-2 font-mono text-[13px] text-text-primary outline-none focus:border-brand transition-colors flex-1"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+				/>
 				<select
 					className="bg-transparent border border-border p-2 font-mono text-xs uppercase text-text-primary outline-none focus:border-brand transition-colors cursor-pointer"
 					value={filter}
@@ -100,9 +116,11 @@ export default function EventsTab() {
 										</span>
 									</td>
 									<td className="p-4 text-[12px] flex gap-3 justify-end font-medium">
-										<button className="text-text-primary hover:text-brand transition-colors cursor-pointer bg-transparent border-none">
+										<Link
+											to={routeLinks.adminViewEvent.replace(":id", event.id.toString())}
+											className="text-text-primary hover:text-brand transition-colors cursor-pointer bg-transparent border-none no-underline">
 											View
-										</button>
+										</Link>
 										{event.status === "pending" && (
 											<>
 												<button

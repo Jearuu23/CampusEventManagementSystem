@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { UserRole } from "~/types/user";
+import { routeLinks } from "~/constants";
 
 export default function Header() {
 	const { userRole, logout } = useAuth();
@@ -10,20 +11,20 @@ export default function Header() {
 
 	const handleLogout = async () => {
 		await logout();
-		navigate("/");
+		navigate(routeLinks.home);
 	};
 
 	const mainNavLinks = [
-		{ name: "Home", path: "/" },
-		{ name: "About", path: "/about" },
-		{ name: "Event Listings", path: "/event-listing" },
+		{ name: "Home", path: routeLinks.home },
+		{ name: "About", path: routeLinks.about },
+		{ name: "Event Listings", path: routeLinks.eventListing },
 	];
 
 	const userLinks: { name: string; path: string }[] = [];
 	const organizerLinks = [
-		{ name: "Dashboard", path: "/dashboard" },
-		{ name: "Event Management", path: "/event-management" },
-		{ name: "Participant Management", path: "/participant-management" },
+		{ name: "Dashboard", path: routeLinks.adminDashboard },
+		{ name: "Event Management", path: routeLinks.adminEventManagement },
+		{ name: "Participant Management", path: routeLinks.adminParticipantManagement },
 	];
 
 	const currentNavLinks = [
@@ -44,7 +45,7 @@ export default function Header() {
 
 	return (
 		<nav className="bg-sidebar border-b border-white/10 sticky top-0 z-[100] flex items-center justify-between px-6 md:px-12 h-14">
-			<NavLink to="/" className="font-serif font-bold text-[18px] text-background tracking-[0.02em] no-underline shrink-0">
+			<NavLink to={routeLinks.home} className="font-serif font-bold text-[18px] text-background tracking-[0.02em] no-underline shrink-0">
 				Campus<span className="text-brand">Events</span>
 			</NavLink>
 
@@ -60,7 +61,7 @@ export default function Header() {
 				<li className="flex items-center gap-6 ml-2">
 					{userRole === UserRole.USER ? (
 						<NavLink
-							to="/login"
+							to={routeLinks.login}
 							className="bg-brand text-background px-5 py-2 rounded-[2px] text-[13px] font-medium tracking-[0.08em] uppercase hover:bg-brand-hover transition-colors no-underline">
 							Staff Login
 						</NavLink>
@@ -111,13 +112,13 @@ export default function Header() {
 							{userRole === UserRole.USER ? (
 								<>
 									<NavLink
-										to="/login"
+										to={routeLinks.login}
 										onClick={() => setIsOpen(false)}
 										className="block w-full text-center text-background/55 hover:bg-white/5 hover:text-background px-4 py-2 rounded-[2px] text-[13px] font-normal tracking-[0.08em] uppercase transition-colors">
 										Staff Login
 									</NavLink>
 									<NavLink
-										to="/register"
+										to={routeLinks.register}
 										onClick={() => setIsOpen(false)}
 										className="block w-full text-center bg-brand text-background px-4 py-2.5 rounded-[2px] text-[13px] font-medium tracking-[0.08em] uppercase hover:bg-brand-hover transition-colors">
 										Create Event

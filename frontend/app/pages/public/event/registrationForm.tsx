@@ -1,10 +1,11 @@
 import React from "react";
+import type { Event } from "~/types/events";
 
-export default function RegistrationForm({ event }: { event?: any }) {
+export default function RegistrationForm({ event }: { event?: Event }) {
 	if (!event) return null;
 
 	const isFull = event.max_participants && (event.current_participants || 0) >= event.max_participants;
-	const isClosed = event.status === "completed" || event.status === "cancelled" || event.status === "draft" || event.status === "rejected";
+	const isClosed = event.status === "completed" || event.status === "cancelled" || event.status === "rejected";
 	const isDisabled = isFull || isClosed;
 
 	let buttonText = "Confirm Registration";

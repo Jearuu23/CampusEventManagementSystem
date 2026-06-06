@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { UserRole } from "~/types/user";
+import { routeLinks } from "~/constants";
 
 export default function Sidebar() {
 	const { userRole, logout } = useAuth();
@@ -8,13 +9,13 @@ export default function Sidebar() {
 
 	const handleLogout = async () => {
 		await logout();
-		navigate("/");
+		navigate(routeLinks.home);
 	};
 
 	const dashboardLinks = [
 		{
 			name: "Dashboard",
-			path: "/dashboard",
+			path: routeLinks.adminDashboard,
 			icon: (
 				<svg
 					width="18"
@@ -34,7 +35,7 @@ export default function Sidebar() {
 		},
 		{
 			name: "Event Management",
-			path: "/event-management",
+			path: routeLinks.adminEventManagement,
 			icon: (
 				<svg
 					width="18"
@@ -54,7 +55,7 @@ export default function Sidebar() {
 		},
 		{
 			name: "Participant Mgmt",
-			path: "/participant-management",
+			path: routeLinks.adminParticipantManagement,
 			icon: (
 				<svg
 					width="18"
@@ -77,7 +78,7 @@ export default function Sidebar() {
 	return (
 		<aside className="w-64 bg-sidebar border-r border-white/10 flex flex-col h-full sticky top-0 shrink-0">
 			<div className="h-14 flex items-center px-6 border-b border-white/10 shrink-0">
-				<NavLink to="/" className="font-serif font-bold text-[18px] text-background tracking-[0.02em] no-underline">
+				<NavLink to={routeLinks.home} className="font-serif font-bold text-[18px] text-background tracking-[0.02em] no-underline">
 					Campus<span className="text-brand">Events</span>
 				</NavLink>
 			</div>

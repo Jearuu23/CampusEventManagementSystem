@@ -2,9 +2,10 @@ import { useEffect, useRef } from "react";
 import { useLoaderData } from "react-router";
 import HeroSection from "./heroSection";
 import MainContent from "./mainContent";
+import type { Event as EventType } from "~/types/events";
 
 export default function Event() {
-	const { event } = useLoaderData() as { event: any };
+	const { event } = useLoaderData() as { event: EventType };
 	const observerRef = useRef<IntersectionObserver | null>(null);
 
 	useEffect(() => {
@@ -36,7 +37,6 @@ export default function Event() {
 
 	return (
 		<div className="font-sans text-text-primary bg-background min-h-screen">
-			{/* @ts-ignore - Pass event data to HeroSection so it can render the Title and Image */}
 			<HeroSection event={event} />
 			<MainContent event={event} />
 		</div>

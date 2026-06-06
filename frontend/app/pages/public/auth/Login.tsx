@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { UserRole } from "~/types/user";
 import { LoginUser } from "~/api/user";
+import { routeLinks } from "~/constants";
 
 export default function Login() {
 	const { login } = useAuth();
@@ -21,7 +22,7 @@ export default function Login() {
 			if (data.success) {
 				// Update context state and localStorage
 				login(data.user.role as UserRole);
-				navigate("/dashboard");
+				navigate(routeLinks.adminDashboard);
 			} else {
 				setError(data.message || "Login failed");
 			}

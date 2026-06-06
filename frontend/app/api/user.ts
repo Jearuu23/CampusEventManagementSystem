@@ -62,9 +62,16 @@ export async function GetEvent(id: number) {
 	return res.json().then((data) => data);
 }
 
-export async function GetOrganizers() {
+export async function GetOrganizers(params?: { status?: string; search?: string }) {
 	try {
-		const res = await fetch(`${API_URL}auth/manageOrganizer.php`, {
+		const query = new URLSearchParams();
+		if (params?.status) query.append("status", params.status);
+		if (params?.search) query.append("search", params.search);
+
+		const queryString = query.toString();
+		const url = `${API_URL}auth/manageOrganizer.php${queryString ? `?${queryString}` : ""}`;
+
+		const res = await fetch(url, {
 			method: "GET",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",

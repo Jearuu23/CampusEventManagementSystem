@@ -1,4 +1,4 @@
-import type { Route } from "../+types/home";
+import type { Route } from "../+types/participantManagement";
 import { default as ParticipantManagementPage } from "~/pages/admin/participantManagement/ParticipantManagement";
 import RouteHandler from "../RouteHandler";
 import { UserRole } from "~/types/user";

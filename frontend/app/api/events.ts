@@ -1,12 +1,13 @@
 import { API_URL } from "./constant";
 
-export async function GetEvents(params?: { status?: string; organizer_id?: number; limit?: number; offset?: number }) {
+export async function GetEvents(params?: { status?: string; organizer_id?: number; limit?: number; offset?: number; search?: string }) {
 	try {
 		const query = new URLSearchParams();
 		if (params?.status) query.append("status", params.status);
 		if (params?.organizer_id) query.append("organizer_id", params.organizer_id.toString());
 		if (params?.limit) query.append("limit", params.limit.toString());
 		if (params?.offset !== undefined) query.append("offset", params.offset.toString());
+		if (params?.search) query.append("search", params.search);
 
 		const queryString = query.toString();
 		const url = `${API_URL}events/getEvents.php${queryString ? `?${queryString}` : ""}`;
@@ -96,6 +97,56 @@ export async function DeleteEvent(id: number) {
 		});
 		return await res.json();
 	} catch (error) {
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function GetParticipants(params?: { event_id?: number; status?: string; search?: string }) {
+	try {
+		const query = new URLSearchParams();
+		if (params?.event_id) query.append("event_id", params.event_id.toString());
+		if (params?.status) query.append("status", params.status);
+		if (params?.search) query.append("search", params.search);
+
+		const queryString = query.toString();
+		const url = `${API_URL}events/getParticipants.php${queryString ? `?${queryString}` : ""}`;
+
+		const res = await fetch(url, {
+			method: "GET",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+		});
+		const text = await res.text();
+		try {
+			const data = JSON.parse(text);
+			return data;
+		} catch (e) {
+			console.error("GetParticipants JSON Parse Error. PHP Output:", text);
+			return { success: false, message: "Invalid JSON from server. Check console for details." };
+		}
+	} catch (error) {
+		console.error("GetParticipants Network Error:", error);
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function UpdateParticipantStatus(data: { event_id: number; email: string; status: string }) {
+	try {
+		const res = await fetch(`${API_URL}events/updateParticipation.php`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(data),
+		});
+		const text = await res.text();
+		try {
+			return JSON.parse(text);
+		} catch (e) {
+			console.error("UpdateParticipantStatus JSON Parse Error. PHP Output:", text);
+			return { success: false, message: "Invalid JSON from server. Check console for details." };
+		}
+	} catch (error) {
+		console.error("UpdateParticipantStatus Network Error:", error);
 		return { success: false, message: "Network Error" };
 	}
 }

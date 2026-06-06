@@ -3,6 +3,7 @@ import { GetOrganizers, UpdateOrganizerStatus } from "~/api/user";
 
 export default function OrganizersTab() {
 	const [filter, setFilter] = useState("all");
+	const [searchQuery, setSearchQuery] = useState("");
 	const [organizers, setOrganizers] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -27,11 +28,28 @@ export default function OrganizersTab() {
 		}
 	};
 
-	const filteredOrganizers = filter === "all" ? organizers : organizers.filter((o) => o.status === filter);
+	const filteredOrganizers = organizers.filter((o) => {
+		const matchesStatus = filter === "all" || o.status === filter;
+		const searchLower = searchQuery.toLowerCase();
+		const matchesSearch =
+			!searchQuery ||
+			o.name?.toLowerCase().includes(searchLower) ||
+			o.org?.toLowerCase().includes(searchLower) ||
+			o.email?.toLowerCase().includes(searchLower);
+
+		return matchesStatus && matchesSearch;
+	});
 
 	return (
 		<div className="fade-in-element">
-			<div className="flex gap-4 mb-6">
+			<div className="flex flex-col sm:flex-row gap-4 mb-4">
+				<input
+					type="text"
+					placeholder="Search by name, organization, or email..."
+					className="bg-transparent border border-border p-2 font-mono text-[13px] text-text-primary outline-none focus:border-brand transition-colors flex-1"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+				/>
 				<select
 					className="bg-transparent border border-border p-2 font-mono text-xs uppercase text-text-primary outline-none focus:border-brand transition-colors cursor-pointer"
 					value={filter}
@@ -43,7 +61,11 @@ export default function OrganizersTab() {
 				</select>
 			</div>
 
-			<div className="border border-border bg-background">
+			<div className="font-mono text-[11px] text-text-muted tracking-[0.08em] mb-4 uppercase">
+				Total organizers: {filteredOrganizers.length}
+			</div>
+
+			<div className="border border-border bg-background overflow-x-auto">
 				<table className="w-full text-left border-collapse">
 					<thead>
 						<tr className="bg-surface-secondary border-b border-border">
