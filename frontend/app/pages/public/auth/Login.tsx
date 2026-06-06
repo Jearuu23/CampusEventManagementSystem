@@ -10,9 +10,11 @@ export default function Login() {
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState<string | null>(null);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setError(null);
 		try {
 			const data = await LoginUser({ email, password });
 
@@ -21,66 +23,82 @@ export default function Login() {
 				login(data.user.role as UserRole);
 				navigate("/dashboard");
 			} else {
-				alert(data.message || "Login failed");
+				setError(data.message || "Login failed");
 			}
-		} catch (error) {
-			console.error("Error logging in:", error);
-			alert("An error occurred while communicating with the server.");
+		} catch (err) {
+			console.error("Error logging in:", err);
+			setError("An error occurred while communicating with the server.");
 		}
 	};
 
 	return (
-		<main className="flex flex-col md:flex-row min-h-[calc(100vh-140px)] w-full bg-background">
+		<main className="flex flex-col lg:flex-row min-h-[calc(100vh-56px)] w-full bg-background font-sans text-text-primary">
 			{/* Left Panel - Hero/Marketing Copy */}
-			<section className="relative w-full md:w-1/2 min-h-[400px] md:min-h-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
-				{/* Background Image with slight overlay for readability if needed */}
-				<div
-					className="absolute inset-0 z-0 bg-cover bg-center"
-					style={{
-						backgroundImage: "url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80')",
-					}}>
-					{/* Optional subtle gradient overlay */}
-					<div className="absolute inset-0 bg-primary-900/10"></div>
-				</div>
-
-				{/* Text Box Overlay */}
-				<div className="relative z-10 bg-surface/95 backdrop-blur-sm p-8 md:p-12 max-w-lg w-full shadow-card border border-border">
-					<h1 className="text-4xl md:text-5xl font-bold text-text-secondary mb-6 leading-tight tracking-tight">
+			<section className="hidden lg:flex w-1/2 bg-text-primary relative items-center justify-center p-20 overflow-hidden">
+				<div className="relative z-10 w-full max-w-lg fade-in-element">
+					<div className="font-mono text-[11px] tracking-[0.2em] uppercase text-brand mb-6 flex items-center gap-3 before:content-[''] before:block before:w-8 before:h-px before:bg-brand">
+						Organizer Portal
+					</div>
+					<h1 className="font-serif text-[clamp(40px,4vw,60px)] font-black leading-[1.05] text-background mb-6">
 						Orchestrate
 						<br />
-						Campus Life.
+						<em className="italic text-brand">Campus Life.</em>
 					</h1>
-					<p className="text-text-muted leading-relaxed">
+					<p className="text-[15px] font-light text-background/60 leading-[1.7]">
 						Access the centralized management suite to create, organize, and monitor events across the university ecosystem. Secure,
 						efficient, and designed for faculty and organizers.
 					</p>
 				</div>
+				<div className="absolute inset-0 bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] flex items-center justify-center -z-10">
+					<svg width="400" height="400" viewBox="0 0 80 80" fill="none" className="opacity-10">
+						<circle cx="40" cy="40" r="30" stroke="#a8873a" strokeWidth="1" />
+						<line x1="40" y1="10" x2="40" y2="70" stroke="#a8873a" strokeWidth="0.5" />
+						<line x1="10" y1="40" x2="70" y2="40" stroke="#a8873a" strokeWidth="0.5" />
+					</svg>
+				</div>
 			</section>
 
 			{/* Right Panel - Login Form */}
-			<section className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 bg-background-muted">
-				<div className="bg-surface border border-border shadow-card w-full max-w-md p-8 pt-6">
-					{/* Form Tabs */}
-					<div className="flex border-b border-border-muted mb-8">
-						<button className="flex-1 text-center py-3 border-b-2 border-brand font-semibold text-text-primary text-sm">Login</button>
+			<section className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20">
+				<div className="w-full max-w-md fade-in-element">
+					<div className="flex border-b border-border mb-12">
+						<button className="flex-1 pb-4 text-[13px] font-medium tracking-[0.08em] uppercase text-text-primary border-b-2 border-brand text-center cursor-pointer bg-transparent">
+							Staff Login
+						</button>
 						<button
-							className="flex-1 text-center py-3 text-text-muted hover:text-text-primary transition-colors text-sm font-medium"
-							onClick={() => navigate("/register")}>
-							Organizer Registration
+							onClick={() => navigate("/register")}
+							className="flex-1 pb-4 text-[13px] font-normal tracking-[0.08em] uppercase text-text-muted hover:text-text-primary border-b-2 border-transparent transition-colors text-center cursor-pointer bg-transparent">
+							Register
 						</button>
 					</div>
 
-					{/* Form Header */}
-					<div className="text-center mb-8">
-						<h2 className="text-2xl font-bold text-text-secondary mb-2">Welcome Back</h2>
-						<p className="text-sm text-text-muted">Sign in to your administrative dashboard.</p>
-					</div>
+					<h2 className="font-serif text-[32px] font-bold mb-2">Welcome Back</h2>
+					<p className="text-[14px] text-text-muted font-light mb-8">Sign in to your account.</p>
 
-					{/* Login Form */}
-					<form className="space-y-5" onSubmit={handleSubmit}>
-						<div>
-							<label htmlFor="email" className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-								University Email
+					{error && (
+						<div className="mb-6 p-4 bg-[rgba(200,64,30,0.1)] border border-[rgba(200,64,30,0.2)] rounded-[2px] text-brand text-[13px] font-medium flex items-start gap-2 fade-in-element">
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="shrink-0 mt-0.5">
+								<circle cx="12" cy="12" r="10"></circle>
+								<line x1="12" y1="8" x2="12" y2="12"></line>
+								<line x1="12" y1="16" x2="12.01" y2="16"></line>
+							</svg>
+							<span>{error}</span>
+						</div>
+					)}
+
+					<form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+						<div className="flex flex-col gap-2">
+							<label htmlFor="email" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
+								Email
 							</label>
 							<input
 								type="email"
@@ -88,18 +106,18 @@ export default function Login() {
 								required
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								placeholder="faculty@university.edu"
-								className="w-full border border-border rounded-sm px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-shadow"
+								placeholder="john@email.com"
+								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
 						</div>
 
-						<div>
-							<div className="flex justify-between items-center mb-1.5">
-								<label htmlFor="password" className="block text-xs font-bold text-text-secondary uppercase tracking-wide">
+						<div className="flex flex-col gap-2">
+							<div className="flex justify-between items-end">
+								<label htmlFor="password" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
 									Password
 								</label>
-								<a href="#" className="text-xs font-medium text-brand hover:text-brand-hover hover:underline">
-									Forgot password?
+								<a href="#" className="font-mono text-[10px] tracking-[0.05em] text-brand hover:underline transition-all">
+									Forgot?
 								</a>
 							</div>
 							<input
@@ -109,16 +127,15 @@ export default function Login() {
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								placeholder="••••••••"
-								className="w-full border border-border rounded-sm px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-shadow"
+								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
 						</div>
 
 						<button
 							type="submit"
-							className="w-full bg-brand text-text-inverse hover:bg-brand-hover active:bg-brand-active transition-colors py-2.5 rounded-sm font-semibold flex items-center justify-center gap-2 mt-4 shadow-sm">
+							className="mt-6 bg-brand text-background px-6 py-4 text-[13px] font-medium tracking-[0.08em] uppercase rounded-[2px] transition-all hover:bg-brand-hover hover:-translate-y-[1px] w-full text-center cursor-pointer border-none flex items-center justify-center gap-2">
 							Sign In
 							<svg
-								xmlns="http://www.w3.org/2000/svg"
 								width="16"
 								height="16"
 								viewBox="0 0 24 24"
@@ -127,9 +144,8 @@ export default function Login() {
 								strokeWidth="2"
 								strokeLinecap="round"
 								strokeLinejoin="round">
-								<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-								<polyline points="10 17 15 12 10 7" />
-								<line x1="15" y1="12" x2="3" y2="12" />
+								<path d="M5 12h14"></path>
+								<path d="m12 5 7 7-7 7"></path>
 							</svg>
 						</button>
 					</form>

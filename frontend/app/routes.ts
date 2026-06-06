@@ -2,24 +2,21 @@ import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
 const publicRoute = "routes/public/";
 const adminRoute = "routes/admin/";
-const studentRoute = "routes/student/";
 
 const appRoutes = {
 	// Public
 	home: { path: "/", component: publicRoute + "home.tsx" },
 	about: { path: "/about", component: publicRoute + "about.tsx" },
-	eventListng: { path: "/eventListing", component: publicRoute + "eventListing.tsx" },
+	eventListng: { path: "/event-listing", component: publicRoute + "eventListing.tsx" },
 	login: { path: "/login", component: publicRoute + "login.tsx" },
 	register: { path: "/register", component: publicRoute + "register.tsx" },
+	eventRegistration: { path: "/event/:id", component: publicRoute + "event.$id.tsx" },
 	// forgotPassword: publicRoute + "forgotPassword.tsx",
 
-	// Admin
+	// Admin / Organizer
 	dashboard: { path: "/dashboard", component: adminRoute + "dashboard.tsx" },
-	eventManagement: { path: "/eventManagement", component: adminRoute + "eventManagement.tsx" },
-	participantManagement: { path: "/participantManagement", component: adminRoute + "participantManagement.tsx" },
-
-	// Student
-	eventRegistration: { path: "/eventRegistration", component: studentRoute + "eventRegistration.tsx" },
+	eventManagement: { path: "/event-management", component: adminRoute + "eventManagement.tsx" },
+	participantManagement: { path: "/participant-management", component: adminRoute + "participantManagement.tsx" },
 };
 
 const routes = [];
@@ -30,9 +27,3 @@ for (const [key, value] of Object.entries(appRoutes)) {
 }
 
 export default routes satisfies RouteConfig;
-
-// export default [
-// 	index(publicRoute + "home.tsx"),
-// 	route("about", publicRoute + "about.tsx"),
-// 	route("eventListng", publicRoute + "eventListng.tsx"),
-// ] satisfies RouteConfig;

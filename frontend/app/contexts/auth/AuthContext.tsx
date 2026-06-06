@@ -7,12 +7,14 @@ interface AuthContextType {
 	setUserRole: (role: UserRole) => void;
 	login: (role: UserRole) => void;
 	logout: () => void;
+	loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [userRole, setUserRole] = useState<UserRole>(UserRole.USER);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const verifySession = async () => {
@@ -23,6 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				}
 			} catch (error) {
 				console.error("Failed to verify session:", error);
+			} finally {
+				setLoading(false);
 			}
 		};
 
@@ -42,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		setUserRole(UserRole.USER);
 	};
 
-	return <AuthContext.Provider value={{ userRole, setUserRole, login, logout }}>{children}</AuthContext.Provider>;
+	return <AuthContext.Provider value={{ userRole, setUserRole, login, logout, loading }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

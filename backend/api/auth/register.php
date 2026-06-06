@@ -26,7 +26,7 @@ $password = password_hash($data["password"], PASSWORD_BCRYPT);
 $organization = $data["organization"] ?? null;
 $role = $data["role"] ?? "organizer";
 
-$checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$checkStmt = $conn->prepare("SELECT id FROM organizers WHERE email = ?");
 $checkStmt->bind_param("s", $email);
 $checkStmt->execute();
 $result = $checkStmt->get_result();
@@ -45,7 +45,7 @@ if ($result->num_rows > 0) {
 $checkStmt->close();
 
 $insertStmt = $conn->prepare("
-    INSERT INTO users (
+    INSERT INTO organizers (
         first_name,
         last_name,
         email,

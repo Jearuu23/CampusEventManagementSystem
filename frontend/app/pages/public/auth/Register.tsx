@@ -10,9 +10,11 @@ export default function Register() {
 	const [org, setOrg] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState<string | null>(null);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setError(null);
 		try {
 			const data = await RegisterOrganizer({
 				first_name: firstName,
@@ -25,45 +27,59 @@ export default function Register() {
 				alert("Registration successful! Please login.");
 				navigate("/login");
 			} else {
-				alert(data.message || "Registration failed");
+				setError(data.message || "Registration failed");
 			}
-		} catch (error) {
-			console.error("Error registering:", error);
-			alert("An error occurred while communicating with the server.");
+		} catch (err) {
+			console.error("Error registering:", err);
+			setError("An error occurred while communicating with the server.");
 		}
 	};
 
 	return (
-		<main className="flex flex-col-reverse md:flex-row-reverse min-h-[calc(100vh-140px)] w-full bg-background">
+		<main className="flex flex-col-reverse lg:flex-row min-h-[calc(100vh-56px)] w-full bg-background font-sans text-text-primary">
 			{/* Left Panel - Registration Form */}
-			<section className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 bg-background-muted">
-				<div className="bg-surface border border-border shadow-card w-full max-w-md p-8 pt-6">
-					{/* Form Tabs */}
-					<div className="flex border-b border-border-muted mb-8">
+			<section className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 overflow-y-auto">
+				<div className="w-full max-w-md fade-in-element">
+					<div className="flex border-b border-border mb-10">
 						<button
-							type="button"
 							onClick={() => navigate("/login")}
-							className="flex-1 text-center py-3 text-text-muted hover:text-text-primary transition-colors text-sm font-medium">
-							Login
+							className="flex-1 pb-4 text-[13px] font-normal tracking-[0.08em] uppercase text-text-muted hover:text-text-primary border-b-2 border-transparent transition-colors text-center cursor-pointer bg-transparent">
+							Staff Login
 						</button>
-						<button className="flex-1 text-center py-3 border-b-2 border-brand font-semibold text-text-primary text-sm">
-							Organizer Registration
+						<button className="flex-1 pb-4 text-[13px] font-medium tracking-[0.08em] uppercase text-text-primary border-b-2 border-brand text-center cursor-pointer bg-transparent">
+							Register
 						</button>
 					</div>
 
-					{/* Form Header */}
-					<div className="text-center mb-8">
-						<h2 className="text-2xl font-bold text-text-secondary mb-2">Organizer Sign Up</h2>
-						<p className="text-sm text-text-muted">
-							This registration is for event organizers only. Provide your department or organization to request organizer access.
-						</p>
-					</div>
+					<h2 className="font-serif text-[32px] font-bold mb-2">Organizer Sign Up</h2>
+					<p className="text-[14px] text-text-muted font-light mb-8 leading-[1.6]">
+						Provide your department or organization to request organizer access.
+					</p>
 
-					{/* Registration Form */}
-					<form className="space-y-4" onSubmit={handleSubmit}>
-						<div className="grid grid-cols-2 gap-4">
-							<div>
-								<label htmlFor="firstName" className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
+					{error && (
+						<div className="mb-6 p-4 bg-[rgba(200,64,30,0.1)] border border-[rgba(200,64,30,0.2)] rounded-[2px] text-brand text-[13px] font-medium flex items-start gap-2 fade-in-element">
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="shrink-0 mt-0.5">
+								<circle cx="12" cy="12" r="10"></circle>
+								<line x1="12" y1="8" x2="12" y2="12"></line>
+								<line x1="12" y1="16" x2="12.01" y2="16"></line>
+							</svg>
+							<span>{error}</span>
+						</div>
+					)}
+
+					<form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+						<div className="grid grid-cols-2 gap-6">
+							<div className="flex flex-col gap-2">
+								<label htmlFor="firstName" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
 									First Name
 								</label>
 								<input
@@ -72,11 +88,11 @@ export default function Register() {
 									required
 									value={firstName}
 									onChange={(e) => setFirstName(e.target.value)}
-									className="w-full border border-border rounded-sm px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+									className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
 							</div>
-							<div>
-								<label htmlFor="lastName" className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
+							<div className="flex flex-col gap-2">
+								<label htmlFor="lastName" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
 									Last Name
 								</label>
 								<input
@@ -85,14 +101,14 @@ export default function Register() {
 									required
 									value={lastName}
 									onChange={(e) => setLastName(e.target.value)}
-									className="w-full border border-border rounded-sm px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+									className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
 							</div>
 						</div>
 
-						<div>
-							<label htmlFor="org" className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
-								Organization / Department
+						<div className="flex flex-col gap-2">
+							<label htmlFor="org" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
+								Organization / Dept
 							</label>
 							<input
 								type="text"
@@ -101,12 +117,12 @@ export default function Register() {
 								value={org}
 								onChange={(e) => setOrg(e.target.value)}
 								placeholder="e.g. Student Council"
-								className="w-full border border-border rounded-sm px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
 						</div>
 
-						<div>
-							<label htmlFor="email" className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
+						<div className="flex flex-col gap-2">
+							<label htmlFor="email" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
 								University Email
 							</label>
 							<input
@@ -116,12 +132,12 @@ export default function Register() {
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
 								placeholder="organizer@university.edu"
-								className="w-full border border-border rounded-sm px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
 						</div>
 
-						<div>
-							<label htmlFor="password" className="block text-xs font-bold text-text-secondary uppercase tracking-wide mb-1.5">
+						<div className="flex flex-col gap-2">
+							<label htmlFor="password" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
 								Create Password
 							</label>
 							<input
@@ -130,14 +146,14 @@ export default function Register() {
 								required
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								className="w-full border border-border rounded-sm px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 							/>
 						</div>
 
 						<div className="pt-2">
 							<label className="flex items-start gap-3 cursor-pointer">
 								<input type="checkbox" className="mt-1 accent-brand" required />
-								<span className="text-xs text-text-muted leading-tight">
+								<span className="text-[12px] text-text-muted leading-tight font-light">
 									I agree to the university's event hosting policies and terms of service.
 								</span>
 							</label>
@@ -145,10 +161,9 @@ export default function Register() {
 
 						<button
 							type="submit"
-							className="w-full bg-brand text-text-inverse hover:bg-brand-hover active:bg-brand-active transition-colors py-2.5 rounded-sm font-semibold flex items-center justify-center gap-2 mt-4 shadow-sm">
-							Create Organizer Account
+							className="mt-2 bg-brand text-background px-6 py-4 text-[13px] font-medium tracking-[0.08em] uppercase rounded-[2px] transition-all hover:bg-brand-hover hover:-translate-y-[1px] w-full text-center cursor-pointer border-none flex items-center justify-center gap-2">
+							Create Account
 							<svg
-								xmlns="http://www.w3.org/2000/svg"
 								width="16"
 								height="16"
 								viewBox="0 0 24 24"
@@ -157,8 +172,8 @@ export default function Register() {
 								strokeWidth="2"
 								strokeLinecap="round"
 								strokeLinejoin="round">
-								<path d="M5 12h14" />
-								<path d="m12 5 7 7-7 7" />
+								<path d="M5 12h14"></path>
+								<path d="m12 5 7 7-7 7"></path>
 							</svg>
 						</button>
 					</form>
@@ -166,25 +181,26 @@ export default function Register() {
 			</section>
 
 			{/* Right Panel - Hero Content */}
-			<section className="relative w-full md:w-1/2 min-h-[400px] md:min-h-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
-				<div
-					className="absolute inset-0 z-0 bg-cover bg-center"
-					style={{
-						backgroundImage: "url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80')",
-					}}>
-					<div className="absolute inset-0 bg-primary-900/20"></div>
-				</div>
-
-				<div className="relative z-10 bg-surface/95 backdrop-blur-sm p-8 md:p-12 max-w-lg w-full shadow-card border border-border">
-					<h1 className="text-4xl md:text-5xl font-bold text-text-secondary mb-6 leading-tight tracking-tight">
+			<section className="hidden lg:flex w-1/2 bg-text-primary relative items-center justify-center p-20 overflow-hidden">
+				<div className="relative z-10 w-full max-w-lg fade-in-element">
+					<div className="font-mono text-[11px] tracking-[0.2em] uppercase text-brand mb-6 flex items-center gap-3 before:content-[''] before:block before:w-8 before:h-px before:bg-brand">
+						Join the Network
+					</div>
+					<h1 className="font-serif text-[clamp(40px,4vw,60px)] font-black leading-[1.05] text-background mb-6">
 						Empower Your
 						<br />
-						Community.
+						<em className="italic text-brand">Community.</em>
 					</h1>
-					<p className="text-text-muted leading-relaxed">
+					<p className="text-[15px] font-light text-background/60 leading-[1.7]">
 						Join hundreds of faculty members and student leaders who use Campus Events to bring people together. Register today to gain
 						full access to our promotion and logistics tools.
 					</p>
+				</div>
+				<div className="absolute inset-0 bg-gradient-to-br from-[#121815] via-[#1a231d] to-[#0c120f] flex items-center justify-center -z-10">
+					<svg width="400" height="400" viewBox="0 0 60 60" fill="none" className="opacity-[0.15]">
+						<circle cx="30" cy="30" r="24" stroke="#5cb88a" strokeWidth="1" />
+						<circle cx="30" cy="30" r="16" stroke="#5cb88a" strokeWidth="0.5" />
+					</svg>
 				</div>
 			</section>
 		</main>

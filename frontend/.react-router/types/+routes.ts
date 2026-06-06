@@ -17,7 +17,7 @@ type Pages = {
   "/about": {
     params: {};
   };
-  "/eventListing": {
+  "/event-listing": {
     params: {};
   };
   "/login": {
@@ -26,16 +26,18 @@ type Pages = {
   "/register": {
     params: {};
   };
+  "/event/:id": {
+    params: {
+      "id": string;
+    };
+  };
   "/dashboard": {
     params: {};
   };
-  "/eventManagement": {
+  "/event-management": {
     params: {};
   };
-  "/participantManagement": {
-    params: {};
-  };
-  "/eventRegistration": {
+  "/participant-management": {
     params: {};
   };
 };
@@ -43,7 +45,7 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/about" | "/eventListing" | "/login" | "/register" | "/dashboard" | "/eventManagement" | "/participantManagement" | "/eventRegistration";
+    page: "/" | "/about" | "/event-listing" | "/login" | "/register" | "/event/:id" | "/dashboard" | "/event-management" | "/participant-management";
   };
   "routes/public/home.tsx": {
     id: "routes/public/home";
@@ -55,7 +57,7 @@ type RouteFiles = {
   };
   "routes/public/eventListing.tsx": {
     id: "routes/public/eventListing";
-    page: "/eventListing";
+    page: "/event-listing";
   };
   "routes/public/login.tsx": {
     id: "routes/public/login";
@@ -65,21 +67,21 @@ type RouteFiles = {
     id: "routes/public/register";
     page: "/register";
   };
+  "routes/public/event.$id.tsx": {
+    id: "routes/public/event.$id";
+    page: "/event/:id";
+  };
   "routes/admin/dashboard.tsx": {
     id: "routes/admin/dashboard";
     page: "/dashboard";
   };
   "routes/admin/eventManagement.tsx": {
     id: "routes/admin/eventManagement";
-    page: "/eventManagement";
+    page: "/event-management";
   };
   "routes/admin/participantManagement.tsx": {
     id: "routes/admin/participantManagement";
-    page: "/participantManagement";
-  };
-  "routes/student/eventRegistration.tsx": {
-    id: "routes/student/eventRegistration";
-    page: "/eventRegistration";
+    page: "/participant-management";
   };
 };
 
@@ -90,8 +92,8 @@ type RouteModules = {
   "routes/public/eventListing": typeof import("./app/routes/public/eventListing.tsx");
   "routes/public/login": typeof import("./app/routes/public/login.tsx");
   "routes/public/register": typeof import("./app/routes/public/register.tsx");
+  "routes/public/event.$id": typeof import("./app/routes/public/event.$id.tsx");
   "routes/admin/dashboard": typeof import("./app/routes/admin/dashboard.tsx");
   "routes/admin/eventManagement": typeof import("./app/routes/admin/eventManagement.tsx");
   "routes/admin/participantManagement": typeof import("./app/routes/admin/participantManagement.tsx");
-  "routes/student/eventRegistration": typeof import("./app/routes/student/eventRegistration.tsx");
 };

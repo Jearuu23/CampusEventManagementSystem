@@ -2,7 +2,11 @@
 include_once "../core/header.php";
 include "../../database/db.php";
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+	session_start();
+}
+
+header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -40,11 +44,19 @@ $stmt = $conn->prepare("
         organization,
         role,
         is_active
-    FROM users
+    FROM organizers
     WHERE email = ?
       AND is_active = 1
     LIMIT 1
 ");
+
+if (!$stmt) {
+	echo json_encode([
+		"success" => false,
+		"message" => "Database error: " . $conn->error
+	]);
+	exit;
+}
 
 $stmt->bind_param("s", $email);
 $stmt->execute();

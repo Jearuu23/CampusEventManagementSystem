@@ -11,7 +11,7 @@ export type Event = {
 	organizerId: number;
 	maxParticipants: number;
 	currentParticipants: number;
-	status: "draft" | "published" | "ongoing" | "completed" | "cancelled";
+	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
 	createdAt: string;
 	updatedAt: string;
 };
@@ -27,7 +27,7 @@ export type CreateEvent = {
 	location: string;
 	organizerId: number;
 	maxParticipants: number;
-	status: "draft" | "published" | "ongoing" | "completed" | "cancelled";
+	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
 	createdAt: string;
 	updatedAt: string;
 };
@@ -44,7 +44,7 @@ export type UpdateEvent = {
 	location: string;
 	organizerId: number;
 	maxParticipants: number;
-	status: "draft" | "published" | "ongoing" | "completed" | "cancelled";
+	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
 	createdAt: string;
 	updatedAt: string;
 };

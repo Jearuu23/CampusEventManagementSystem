@@ -34,4 +34,20 @@ foreach ($files as $file) {
 	}
 }
 
-echo "Migration complete";
+echo "Migration complete \nSeeding start";
+
+$files = glob("seeds/*.sql");
+
+foreach ($files as $file) {
+	$sql = file_get_contents($file);
+
+	if ($conn->multi_query($sql)) {
+		echo "Executed: $file\n";
+		while ($conn->more_results() && $conn->next_result()) {
+		}
+	} else {
+		echo "Error in $file: " . $conn->error . "\n";
+	}
+}
+
+echo "Seeding complete";
