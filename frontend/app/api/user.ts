@@ -1,4 +1,5 @@
 import { API_URL } from "./constant";
+import type { ParticipationRecord, ParticipantDashboardData } from "~/types/user";
 
 export async function RegisterOrganizer(Credentials: {
 	first_name: string;
@@ -34,6 +35,49 @@ export async function LoginUser(Credentials: { email: string; password: string }
 	} catch (error) {
 		console.error("Server returned non-JSON response:", text);
 		throw new Error("Invalid response from server");
+	}
+}
+
+export async function GetParticipantDashboard(): Promise<{ success: boolean; data?: ParticipantDashboardData; message?: string }> {
+	try {
+		const res = await fetch(`${API_URL}events/getParticipantDashboard.php`, {
+			method: "GET",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+		});
+		return await res.json();
+	} catch (error) {
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function GetParticipationStatus(
+	event_id: number,
+	email: string,
+): Promise<{ success: boolean; data?: ParticipationRecord; message?: string }> {
+	try {
+		const res = await fetch(`${API_URL}participants/getParticipation.php?event_id=${event_id}&email=${encodeURIComponent(email)}`, {
+			method: "GET",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+		});
+		return await res.json();
+	} catch (error) {
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function UpdateParticipationStatus(payload: { event_id: number; email: string; status: string }) {
+	try {
+		const res = await fetch(`${API_URL}events/updateParticipation.php`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(payload),
+		});
+		return await res.json();
+	} catch (error) {
+		return { success: false, message: "Network Error" };
 	}
 }
 

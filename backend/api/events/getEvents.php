@@ -1,10 +1,27 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 $status = isset($_GET["status"]) ? trim($_GET["status"]) : null;
 $organizer_id = isset($_GET["organizer_id"]) ? intval($_GET["organizer_id"]) : null;
 $limit = isset($_GET["limit"]) ? intval($_GET["limit"]) : null;
+
+$errors = [];
+if (isset($_GET['organizer_id']) && !Validator::int($_GET['organizer_id'])) {
+	$errors['organizer_id'] = "Organizer ID must be a valid integer.";
+}
+if (isset($_GET['limit']) && !Validator::int($_GET['limit'])) {
+	$errors['limit'] = "Limit must be a valid integer.";
+}
+if (isset($_GET['offset']) && !Validator::int($_GET['offset'])) {
+	$errors['offset'] = "Offset must be a valid integer.";
+}
+
+if (!empty($errors)) {
+	echo json_encode(["success" => false, "message" => "Validation failed", "errors" => $errors]);
+	exit;
+}
 
 $allowedStatuses = ["draft", "published", "ongoing", "completed", "cancelled", "pending", "approved", "rejected"];
 $statusArray = [];

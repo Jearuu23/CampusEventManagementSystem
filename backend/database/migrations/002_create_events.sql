@@ -12,10 +12,11 @@ CREATE TABLE IF NOT EXISTS events (
     max_participants INT,
     current_participants INT DEFAULT 0,
     status ENUM('pending', 'approved', 'rejected', 'ongoing', 'completed', 'cancelled') DEFAULT 'pending',
+    password VARCHAR(255),
     image_path VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (organizer_id) REFERENCES organizers(id) ON DELETE CASCADE,
+    FOREIGN KEY (organizer_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_organizer_id (organizer_id),
     INDEX idx_event_start_date (event_start_date),
     INDEX idx_status (status)

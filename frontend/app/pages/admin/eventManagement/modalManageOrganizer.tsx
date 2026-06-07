@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { manageOrganizerSchema } from "~/schemas/schemas";
 
 export default function ModalManageOrganizer({
 	isOpen,
@@ -12,6 +13,7 @@ export default function ModalManageOrganizer({
 	onSave: (id: number, data: any) => void;
 }) {
 	const [editData, setEditData] = useState<any>({});
+	const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
 
 	useEffect(() => {
 		if (organizer) {
@@ -32,7 +34,21 @@ export default function ModalManageOrganizer({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		onSave(organizer.id, editData);
+		setValidationErrors({});
+
+		const validationResult = manageOrganizerSchema.safeParse(editData);
+
+		if (!validationResult.success) {
+			const fieldErrors = validationResult.error.flatten().fieldErrors;
+			const errors: { [key: string]: string } = {};
+			for (const key in fieldErrors) {
+				errors[key] = fieldErrors[key as keyof typeof fieldErrors]?.[0] || "";
+			}
+			setValidationErrors(errors);
+			return;
+		}
+
+		onSave(organizer.id, validationResult.data);
 	};
 
 	return (
@@ -54,6 +70,9 @@ export default function ModalManageOrganizer({
 							onChange={handleChange}
 							className="bg-surface-secondary border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 						/>
+						{validationErrors.name && <span className="text-brand text-[11px] mt-1">{validationErrors.name}</span>}
+						{validationErrors.org && <span className="text-brand text-[11px] mt-1">{validationErrors.org}</span>}
+						{validationErrors.email && <span className="text-brand text-[11px] mt-1">{validationErrors.email}</span>}
 					</div>
 					<div className="flex flex-col gap-2">
 						<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Organization</label>
@@ -86,6 +105,7 @@ export default function ModalManageOrganizer({
 							<option value="approved">Approved</option>
 							<option value="rejected">Rejected</option>
 						</select>
+						{validationErrors.status && <span className="text-brand text-[11px] mt-1">{validationErrors.status}</span>}
 					</div>
 					<div className="flex justify-end gap-3 mt-4">
 						<button

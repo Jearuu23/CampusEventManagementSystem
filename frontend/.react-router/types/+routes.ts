@@ -56,12 +56,20 @@ type Pages = {
       "id": string;
     };
   };
+  "/participants/dashboard": {
+    params: {};
+  };
+  "/participants/view-event/:id": {
+    params: {
+      "id": string;
+    };
+  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/about" | "/event-listing" | "/login" | "/register" | "/event/:id" | "/admin/dashboard" | "/admin/event-management" | "/admin/participant-management" | "/admin/view-event/:id" | "/organizer/dashboard" | "/organizer/event-management" | "/organizer/view-event/:id";
+    page: "/" | "/about" | "/event-listing" | "/login" | "/register" | "/event/:id" | "/admin/dashboard" | "/admin/event-management" | "/admin/participant-management" | "/admin/view-event/:id" | "/organizer/dashboard" | "/organizer/event-management" | "/organizer/view-event/:id" | "/participants/dashboard" | "/participants/view-event/:id";
   };
   "routes/public/home.tsx": {
     id: "routes/public/home";
@@ -115,6 +123,14 @@ type RouteFiles = {
     id: "routes/organizers/viewEvent.$id";
     page: "/organizer/view-event/:id";
   };
+  "routes/participants/dashboard.tsx": {
+    id: "routes/participants/dashboard";
+    page: "/participants/dashboard";
+  };
+  "routes/participants/viewEvent.$id.tsx": {
+    id: "routes/participants/viewEvent.$id";
+    page: "/participants/view-event/:id";
+  };
 };
 
 type RouteModules = {
@@ -132,4 +148,6 @@ type RouteModules = {
   "routes/organizers/dashboard": typeof import("./app/routes/organizers/dashboard.tsx");
   "routes/organizers/eventManagement": typeof import("./app/routes/organizers/eventManagement.tsx");
   "routes/organizers/viewEvent.$id": typeof import("./app/routes/organizers/viewEvent.$id.tsx");
+  "routes/participants/dashboard": typeof import("./app/routes/participants/dashboard.tsx");
+  "routes/participants/viewEvent.$id": typeof import("./app/routes/participants/viewEvent.$id.tsx");
 };

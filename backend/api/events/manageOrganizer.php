@@ -1,6 +1,7 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 if (session_status() === PHP_SESSION_NONE) {
 	session_start();
@@ -17,7 +18,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
 	// Fetch all organizers
-	$result = $conn->query("SELECT id, first_name, last_name, CONCAT(first_name, ' ', last_name) AS name, email, organization as org, status FROM organizers WHERE role = 'organizer'");
+	$result = $conn->query("SELECT id, first_name, last_name, CONCAT(first_name, ' ', last_name) AS name, email, organization as org, status FROM users WHERE role = 'organizer'");
 	$organizers = [];
 	while ($row = $result->fetch_assoc()) {
 		$organizers[] = $row;
@@ -26,10 +27,24 @@ if ($method === 'GET') {
 } elseif ($method === 'PUT') {
 	// Update organizer status
 	$data = json_decode(file_get_contents("php://input"), true);
+
+	$errors = [];
+	if (!Validator::int($data['id'] ?? null)) {
+		$errors['id'] = "Valid ID is required.";
+	}
+	if (!Validator::in($data['status'] ?? '', ['pending', 'approved', 'rejected'])) {
+		$errors['status'] = "Invalid status.";
+	}
+
+	if (!empty($errors)) {
+		echo json_encode(["success" => false, "message" => "Validation failed", "errors" => $errors]);
+		exit;
+	}
+
 	$id = $data['id'] ?? null;
 	$status = $data['status'] ?? null;
 
-	$stmt = $conn->prepare("UPDATE organizers SET status = ? WHERE id = ?");
+	$stmt = $conn->prepare("UPDATE users SET status = ? WHERE id = ?");
 	$stmt->bind_param("si", $status, $id);
 	echo json_encode(["success" => $stmt->execute(), "message" => "Organizer status updated"]);
 	$stmt->close();

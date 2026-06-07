@@ -1,11 +1,20 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
-if (!isset($_GET['id']) || empty(trim($_GET['id']))) {
+$id = $_GET['id'] ?? null;
+$errors = [];
+
+if (!Validator::int($id)) {
+	$errors['id'] = "Valid Event ID is required.";
+}
+
+if (!empty($errors)) {
 	echo json_encode([
 		"success" => false,
-		"message" => "Event ID is required"
+		"message" => "Validation failed",
+		"errors" => $errors
 	]);
 	exit;
 }
@@ -18,7 +27,7 @@ $query = "
 		CONCAT(o.first_name, ' ', o.last_name) AS organizer_name,
 		o.organization AS department
 	FROM events e
-	LEFT JOIN organizers o ON e.organizer_id = o.id
+	LEFT JOIN users o ON e.organizer_id = o.id
 	WHERE e.id = ?";
 
 $stmt = $conn->prepare($query);

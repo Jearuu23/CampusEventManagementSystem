@@ -3,6 +3,8 @@ import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { LoginUser } from "~/api/user";
 import { routeLinks } from "~/constants";
+import { loginSchema } from "~/schemas/schemas";
+import { ro } from "zod/locales";
 
 export default function Login() {
 	const { login } = useAuth();
@@ -11,17 +13,35 @@ export default function Login() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
+	const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
+		setValidationErrors({});
+
+		const validationResult = loginSchema.safeParse({ email, password });
+
+		if (!validationResult.success) {
+			const fieldErrors = validationResult.error.flatten().fieldErrors;
+			setValidationErrors({
+				email: fieldErrors.email?.[0],
+				password: fieldErrors.password?.[0],
+			});
+			return;
+		}
+
 		try {
-			const data = await LoginUser({ email, password });
+			const data = await LoginUser(validationResult.data);
 
 			if (data.success) {
-				// Update context state and localStorage
 				login(data.user);
-				const link = data.user.role === "admin" ? routeLinks.adminDashboard : routeLinks.organizerDashboard;
+				let link = routeLinks.organizerDashboard;
+				if (data.user.role === "admin") {
+					link = routeLinks.adminDashboard;
+				} else if (data.user.role === "participant") {
+					link = routeLinks.participantDashboard;
+				}
 				navigate(link);
 			} else {
 				setError(data.message || "Login failed");
@@ -37,16 +57,16 @@ export default function Login() {
 			<section className="hidden lg:flex w-1/2 bg-text-primary relative items-center justify-center p-20 overflow-hidden">
 				<div className="relative z-10 w-full max-w-lg fade-in-element">
 					<div className="font-mono text-[11px] tracking-[0.2em] uppercase text-brand mb-6 flex items-center gap-3 before:content-[''] before:block before:w-8 before:h-px before:bg-brand">
-						Organizer Portal
+						Campus Portal
 					</div>
 					<h1 className="font-serif text-[clamp(40px,4vw,60px)] font-black leading-[1.05] text-background mb-6">
-						Orchestrate
+						Experience
 						<br />
 						<em className="italic text-brand">Campus Life.</em>
 					</h1>
 					<p className="text-[15px] font-light text-background/60 leading-[1.7]">
-						Access the centralized management suite to create, organize, and monitor events across the university ecosystem. Secure,
-						efficient, and designed for faculty and organizers.
+						Access your dashboard to manage events, track your registrations, earn points, and redeem campus rewards. Secure, efficient,
+						and designed for the whole university ecosystem.
 					</p>
 				</div>
 				<div className="absolute inset-0 bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] flex items-center justify-center -z-10">
@@ -63,7 +83,7 @@ export default function Login() {
 				<div className="w-full max-w-md fade-in-element">
 					<div className="flex border-b border-border mb-12">
 						<button className="flex-1 pb-4 text-[13px] font-medium tracking-[0.08em] uppercase text-text-primary border-b-2 border-brand text-center cursor-pointer bg-transparent">
-							Staff Login
+							Login
 						</button>
 						<button
 							onClick={() => navigate("/register")}
@@ -109,6 +129,7 @@ export default function Login() {
 								placeholder="john@email.com"
 								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
+							{validationErrors.email && <span className="text-brand text-[11px] mt-1">{validationErrors.email}</span>}
 						</div>
 
 						<div className="flex flex-col gap-2">
@@ -129,6 +150,7 @@ export default function Login() {
 								placeholder="••••••••"
 								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
+							{validationErrors.password && <span className="text-brand text-[11px] mt-1">{validationErrors.password}</span>}
 						</div>
 
 						<button

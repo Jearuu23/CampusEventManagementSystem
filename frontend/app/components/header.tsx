@@ -21,6 +21,7 @@ export default function Header() {
 	];
 
 	const userLinks: { name: string; path: string }[] = [];
+	const participantLinks = [{ name: "Dashboard", path: "/participants/dashboard" }];
 	const organizerLinks = [
 		{ name: "Dashboard", path: routeLinks.adminDashboard },
 		{ name: "Event Management", path: routeLinks.adminEventManagement },
@@ -30,6 +31,7 @@ export default function Header() {
 	const currentNavLinks = [
 		...mainNavLinks,
 		...(userRole === UserRole.USER ? userLinks : []),
+		...(userRole === UserRole.PARTICIPANT ? participantLinks : []),
 		...(userRole === UserRole.ORGANIZER ? organizerLinks : []),
 	];
 
@@ -63,11 +65,10 @@ export default function Header() {
 						<NavLink
 							to={routeLinks.login}
 							className="bg-brand text-background px-5 py-2 rounded-[2px] text-[13px] font-medium tracking-[0.08em] uppercase hover:bg-brand-hover transition-colors no-underline">
-							Staff Login
+							Login
 						</NavLink>
 					) : (
 						<div className="flex items-center gap-6">
-							<span className="text-[13px] font-normal tracking-[0.08em] uppercase text-background/55">Role: {userRole}</span>
 							<button
 								onClick={handleLogout}
 								className="bg-brand text-background px-5 py-2 rounded-[2px] text-[13px] font-medium tracking-[0.08em] uppercase hover:bg-brand-hover transition-colors no-underline cursor-pointer border-none">
@@ -126,9 +127,6 @@ export default function Header() {
 								</>
 							) : (
 								<>
-									<span className="text-[13px] font-normal tracking-[0.08em] uppercase text-background/55 block w-full text-center mb-1">
-										Role: {userRole}
-									</span>
 									<button
 										onClick={() => {
 											handleLogout();

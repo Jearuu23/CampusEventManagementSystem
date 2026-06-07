@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CreateEvent } from "~/api/events";
 import { useAuth } from "~/contexts/auth/AuthContext";
+import { createEventSchema } from "~/schemas/schemas";
 
 interface ModalCreateEventProps {
 	isOpen: boolean;
@@ -21,6 +22,7 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
 
 	if (!isOpen) return null;
 
@@ -31,6 +33,20 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
+		setValidationErrors({});
+
+		const validationResult = createEventSchema.safeParse(formData);
+
+		if (!validationResult.success) {
+			const fieldErrors = validationResult.error.flatten().fieldErrors;
+			const errors: { [key: string]: string } = {};
+			for (const key in fieldErrors) {
+				errors[key] = fieldErrors[key as keyof typeof fieldErrors]?.[0] || "";
+			}
+			setValidationErrors(errors);
+			return;
+		}
+
 		setIsSubmitting(true);
 
 		try {
@@ -130,6 +146,7 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 								required
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 							/>
+							{validationErrors.title && <span className="text-brand text-[11px] mt-1">{validationErrors.title}</span>}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Location</label>
@@ -140,6 +157,7 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 								onChange={handleChange}
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 							/>
+							{validationErrors.location && <span className="text-brand text-[11px] mt-1">{validationErrors.location}</span>}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Date *</label>
@@ -151,6 +169,9 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 								required
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 							/>
+							{validationErrors.event_start_date && (
+								<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_date}</span>
+							)}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Time</label>
@@ -161,6 +182,9 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 								onChange={handleChange}
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 							/>
+							{validationErrors.event_start_time && (
+								<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_time}</span>
+							)}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Max Participants (Optional)</label>
@@ -171,6 +195,9 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 								onChange={handleChange}
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 							/>
+							{validationErrors.max_participants && (
+								<span className="text-brand text-[11px] mt-1">{validationErrors.max_participants}</span>
+							)}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Event Image</label>
@@ -191,6 +218,7 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 							onChange={handleChange}
 							rows={5}
 							className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"></textarea>
+						{validationErrors.description && <span className="text-brand text-[11px] mt-1">{validationErrors.description}</span>}
 					</div>
 					<div className="flex justify-end gap-4 mt-4 border-t border-border pt-6">
 						<button

@@ -4,6 +4,7 @@ import { routeLinks } from "./constants";
 const publicRoute = "routes/public/";
 const adminRoute = "routes/admin/";
 const organizerRoute = "routes/organizers/";
+const participantRoute = "routes/participants/";
 
 const appRoutes = {
 	// Public
@@ -25,6 +26,10 @@ const appRoutes = {
 	organizerDashboard: { path: routeLinks.organizerDashboard, component: organizerRoute + "dashboard.tsx" },
 	organizerEventManagement: { path: routeLinks.organizerEventManagement, component: organizerRoute + "eventManagement.tsx" },
 	organizerViewEvent: { path: routeLinks.organizerViewEvent, component: organizerRoute + "viewEvent.$id.tsx" },
+
+	// participants
+	participantDashboard: { path: routeLinks.participantDashboard, component: participantRoute + "dashboard.tsx" },
+	participantViewEvent: { path: routeLinks.participantViewEvent, component: participantRoute + "viewEvent.$id.tsx" },
 };
 
 const routes = [];

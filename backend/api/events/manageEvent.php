@@ -1,6 +1,7 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 if (session_status() === PHP_SESSION_NONE) {
 	session_start();
@@ -21,8 +22,15 @@ if ($method === 'PUT') {
 	$id = $data['id'] ?? null;
 	$status = $data['status'] ?? null;
 
-	if (!$id || !$status) {
-		echo json_encode(["success" => false, "message" => "Missing id or status"]);
+	$errors = [];
+	if (!Validator::int($id)) {
+		$errors['id'] = "Valid Event ID is required.";
+	}
+	if (!Validator::string($status)) {
+		$errors['status'] = "Status is required.";
+	}
+	if (!empty($errors)) {
+		echo json_encode(["success" => false, "message" => "Validation failed", "errors" => $errors]);
 		exit;
 	}
 
@@ -33,6 +41,15 @@ if ($method === 'PUT') {
 } elseif ($method === 'DELETE') {
 	// Delete Event
 	$id = $data['id'] ?? null;
+
+	$errors = [];
+	if (!Validator::int($id)) {
+		$errors['id'] = "Valid Event ID is required.";
+	}
+	if (!empty($errors)) {
+		echo json_encode(["success" => false, "message" => "Validation failed", "errors" => $errors]);
+		exit;
+	}
 
 	$stmt = $conn->prepare("DELETE FROM events WHERE id = ?");
 	$stmt->bind_param("i", $id);

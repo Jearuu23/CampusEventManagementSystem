@@ -2,6 +2,7 @@
 include_once "../core/header.php";
 include "../../database/db.php";
 include_once "../../logging/logging.php";
+require_once "../../helpers/validation.php";
 
 session_start();
 
@@ -12,16 +13,30 @@ try {
 
 	$data = json_decode($raw_input, true);
 
-	if (
-		empty($data["first_name"]) ||
-		empty($data["last_name"]) ||
-		empty($data["email"]) ||
-		empty($data["password"])
-	) {
-		Logger::log("Missing required fields. Decoded data: " . json_encode($data));
+	$errors = [];
+
+	if (!Validator::string($data['first_name'] ?? '')) {
+		$errors['first_name'] = "First name is required.";
+	}
+	if (!Validator::string($data['last_name'] ?? '')) {
+		$errors['last_name'] = "Last name is required.";
+	}
+	if (!Validator::string($data['organization'] ?? '')) {
+		$errors['organization'] = "Organization is required.";
+	}
+	if (!Validator::email($data['email'] ?? '')) {
+		$errors['email'] = "A valid email address is required.";
+	}
+	if (!Validator::string($data['password'] ?? '', 6, 255)) {
+		$errors['password'] = "Password must be at least 6 characters.";
+	}
+
+	if (!empty($errors)) {
+		Logger::log("Validation failed during registration: " . json_encode($errors));
 		echo json_encode([
 			"success" => false,
-			"message" => "Missing required fields"
+			"message" => "Validation failed",
+			"errors" => $errors
 		]);
 		exit;
 	}
@@ -34,7 +49,7 @@ try {
 	$role = $data["role"] ?? "organizer";
 	$status = "pending";
 
-	$checkStmt = $conn->prepare("SELECT id FROM organizers WHERE email = ?");
+	$checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 	if (!$checkStmt) {
 		Logger::log("Database error on prepare checkStmt: " . $conn->error);
 		echo json_encode([
@@ -63,7 +78,7 @@ try {
 	$checkStmt->close();
 
 	$insertStmt = $conn->prepare("
-    INSERT INTO organizers (
+    INSERT INTO users (
         first_name,
         last_name,
         email,

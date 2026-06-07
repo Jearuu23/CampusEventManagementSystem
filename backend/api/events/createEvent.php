@@ -1,6 +1,7 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 session_start();
 if (!isset($_SESSION["user_id"])) {
@@ -16,14 +17,25 @@ if (empty($data)) {
 	$data = $_POST;
 }
 
-if (
-	empty($data["title"]) ||
-	(empty($data["event_date"]) && empty($data["event_start_date"])) ||
-	empty($data["organizer_id"])
-) {
+$errors = [];
+if (!Validator::string($data['title'] ?? '')) {
+	$errors['title'] = "Title is required.";
+}
+if (empty($data['event_date']) && empty($data['event_start_date'])) {
+	$errors['event_start_date'] = "Event date is required.";
+}
+if (!Validator::int($data['organizer_id'] ?? null)) {
+	$errors['organizer_id'] = "Organizer ID is required.";
+}
+if (!empty($data['max_participants']) && !Validator::int($data['max_participants'])) {
+	$errors['max_participants'] = "Max participants must be a valid number.";
+}
+
+if (!empty($errors)) {
 	echo json_encode([
 		"success" => false,
-		"message" => "Missing required fields: title, event_date, organizer_id"
+		"message" => "Validation failed",
+		"errors" => $errors
 	]);
 	exit;
 }
@@ -57,7 +69,7 @@ if (!in_array($status, $allowedStatuses, true)) {
 }
 
 // Verify organizer exists and has admin/organizer role.
-$userStmt = $conn->prepare("SELECT id FROM organizers WHERE id = ? AND role IN ('admin','organizer') AND status = 'approved'");
+$userStmt = $conn->prepare("SELECT id FROM users WHERE id = ? AND role IN ('admin','organizer') AND status = 'approved'");
 $userStmt->bind_param("i", $organizer_id);
 $userStmt->execute();
 $userResult = $userStmt->get_result();

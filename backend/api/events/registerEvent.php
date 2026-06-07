@@ -2,33 +2,47 @@
 include_once "../core/header.php";
 include "../../database/db.php";
 include_once "../../logging/logging.php";
+require_once "../../helpers/validation.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 if (empty($data)) {
 	$data = $_POST;
 }
 
-if (
-	empty($data["event_id"]) ||
-	empty($data["first_name"]) ||
-	empty($data["last_name"]) ||
-	empty($data["email"])
-) {
+$errors = [];
+if (!Validator::int($data['event_id'] ?? null)) {
+	$errors['event_id'] = "Valid Event ID is required.";
+}
+
+$is_logged_in_payload = isset($data['participant_id']) && isset($data['email']);
+
+if (!$is_logged_in_payload) {
+	if (!Validator::string($data['first_name'] ?? '')) {
+		$errors['first_name'] = "First name is required.";
+	}
+	if (!Validator::string($data['last_name'] ?? '')) {
+		$errors['last_name'] = "Last name is required.";
+	}
+	if (!Validator::email($data['email'] ?? '')) {
+		$errors['email'] = "A valid email address is required.";
+	}
+	if (!Validator::string($data['password'] ?? '', 6, 255)) {
+		$errors['password'] = "Password must be at least 6 characters.";
+	}
+}
+
+if (!empty($errors)) {
+	Logger::log("registerEvent.php Validation Failed. Received Payload: " . json_encode($data) . " | Errors: " . json_encode($errors));
 	echo json_encode([
 		"success" => false,
-		"message" => "Missing required fields: event_id, first_name, last_name, email"
+		"message" => "Validation failed",
+		"errors" => $errors
 	]);
 	exit;
 }
 
 $event_id = intval($data["event_id"]);
-$first_name = trim($data["first_name"]);
-$last_name = trim($data["last_name"]);
-$email = trim($data["email"]);
-$phone = isset($data["phone"]) ? trim($data["phone"]) : null;
-$organization = isset($data["organization"]) ? trim($data["organization"]) : null;
 
-// 1. Verify Event exists
 $checkEventStmt = $conn->prepare("SELECT id, title FROM events WHERE id = ?");
 $checkEventStmt->bind_param("i", $event_id);
 $checkEventStmt->execute();
@@ -44,38 +58,68 @@ $eventRow = $eventResult->fetch_assoc();
 $eventTitle = $eventRow['title'];
 $checkEventStmt->close();
 
-// 2. Find or Create Participant
 $participant_id = null;
-$checkParticipantStmt = $conn->prepare("SELECT id FROM participants WHERE email = ?");
-$checkParticipantStmt->bind_param("s", $email);
-$checkParticipantStmt->execute();
-$participantResult = $checkParticipantStmt->get_result();
+$first_name = '';
+$last_name = '';
+$email = '';
 
-if ($participantResult->num_rows > 0) {
-	// Participant exists, get their ID and optionally update their details
-	$row = $participantResult->fetch_assoc();
-	$participant_id = $row['id'];
+if ($is_logged_in_payload) {
+	$participant_id = intval($data['participant_id']);
+	$email = trim($data['email']);
 
-	$updateParticipantStmt = $conn->prepare("UPDATE participants SET first_name = ?, last_name = ?, phone = ?, organization = ? WHERE id = ?");
-	$updateParticipantStmt->bind_param("ssssi", $first_name, $last_name, $phone, $organization, $participant_id);
-	$updateParticipantStmt->execute();
-	$updateParticipantStmt->close();
-} else {
-	// Participant does not exist, create a new one
-	$insertParticipantStmt = $conn->prepare("INSERT INTO participants (first_name, last_name, email, phone, organization) VALUES (?, ?, ?, ?, ?)");
-	$insertParticipantStmt->bind_param("sssss", $first_name, $last_name, $email, $phone, $organization);
+	$checkParticipantStmt = $conn->prepare("SELECT id, first_name, last_name, email FROM users WHERE id = ? AND email = ?");
+	$checkParticipantStmt->bind_param("is", $participant_id, $email);
+	$checkParticipantStmt->execute();
+	$participantResult = $checkParticipantStmt->get_result();
 
-	if ($insertParticipantStmt->execute()) {
-		$participant_id = $insertParticipantStmt->insert_id;
+	if ($participantResult->num_rows > 0) {
+		$row = $participantResult->fetch_assoc();
+		$first_name = $row['first_name'];
+		$last_name = $row['last_name'];
 	} else {
-		echo json_encode(["success" => false, "message" => "Failed to create participant: " . $conn->error]);
-		$insertParticipantStmt->close();
+		echo json_encode(["success" => false, "message" => "Invalid participant details provided"]);
+		$checkParticipantStmt->close();
 		$conn->close();
 		exit;
 	}
-	$insertParticipantStmt->close();
+	$checkParticipantStmt->close();
+} else {
+	$first_name = trim($data["first_name"]);
+	$last_name = trim($data["last_name"]);
+	$email = trim($data["email"]);
+	$password = password_hash($data["password"], PASSWORD_BCRYPT);
+	$phone = isset($data["phone"]) ? trim($data["phone"]) : null;
+	$organization = isset($data["organization"]) ? trim($data["organization"]) : null;
+
+	$checkParticipantStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+	$checkParticipantStmt->bind_param("s", $email);
+	$checkParticipantStmt->execute();
+	$participantResult = $checkParticipantStmt->get_result();
+
+	if ($participantResult->num_rows > 0) {
+		// Participant exists, get their ID and optionally update their details
+		$row = $participantResult->fetch_assoc();
+		$participant_id = $row['id'];
+		$updateParticipantStmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, password = ?, phone = ?, organization = ? WHERE id = ?");
+		$updateParticipantStmt->bind_param("sssssi", $first_name, $last_name, $password, $phone, $organization, $participant_id);
+		$updateParticipantStmt->execute();
+		$updateParticipantStmt->close();
+	} else {
+		// Participant does not exist, create a new one
+		$insertParticipantStmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, password, phone, organization, role, status) VALUES (?, ?, ?, ?, ?, ?, 'participant', 'approved')");
+		$insertParticipantStmt->bind_param("ssssss", $first_name, $last_name, $email, $password, $phone, $organization);
+		if ($insertParticipantStmt->execute()) {
+			$participant_id = $insertParticipantStmt->insert_id;
+		} else {
+			echo json_encode(["success" => false, "message" => "Failed to create participant: " . $conn->error]);
+			$insertParticipantStmt->close();
+			$conn->close();
+			exit;
+		}
+		$insertParticipantStmt->close();
+	}
+	$checkParticipantStmt->close();
 }
-$checkParticipantStmt->close();
 
 $registerStmt = $conn->prepare("INSERT INTO event_registrations (event_id, participant_id, status) VALUES (?, ?, 'registered')");
 $registerStmt->bind_param("ii", $event_id, $participant_id);
@@ -96,7 +140,6 @@ if ($registerStmt->execute()) {
 	$headers .= "Reply-To: noreply@university.edu\r\n";
 	$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-	// Attempt to send the email
 	$mailSent = @mail($email, $subject, $message, $headers);
 	if ($mailSent) {
 		Logger::log("Email successfully sent to: " . $email);
@@ -109,7 +152,7 @@ if ($registerStmt->execute()) {
 		"message" => "Successfully registered for the event." . ($mailSent ? " A confirmation email has been sent." : " (Email simulated locally).")
 	]);
 } else {
-	if ($conn->errno === 1062) { // 1062 is MySQL duplicate entry error code
+	if ($conn->errno === 1062) {
 		echo json_encode(["success" => false, "message" => "Participant is already registered for this event."]);
 	} else {
 		echo json_encode(["success" => false, "message" => "Failed to register for event: " . $conn->error]);

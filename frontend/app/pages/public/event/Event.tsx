@@ -4,10 +4,12 @@ import HeroSection from "./heroSection";
 import MainContent from "./mainContent";
 import type { Event as EventType } from "~/types/events";
 import { getImageUrl } from "~/utils/helpers";
+import { useAuth } from "~/contexts/auth/AuthContext";
 
 export default function Event() {
 	const { event } = useLoaderData() as { event: EventType };
 	const observerRef = useRef<IntersectionObserver | null>(null);
+	const { user } = useAuth();
 
 	useEffect(() => {
 		observerRef.current = new IntersectionObserver(
@@ -46,7 +48,7 @@ export default function Event() {
 			)}
 			<div className="relative z-10">
 				<HeroSection event={event} />
-				<MainContent event={event} />
+				<MainContent event={event} user={user} />
 			</div>
 		</div>
 	);

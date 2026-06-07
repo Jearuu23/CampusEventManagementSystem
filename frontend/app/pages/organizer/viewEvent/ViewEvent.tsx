@@ -6,6 +6,7 @@ import EventDetails from "~/pages/admin/viewEvent/eventDetails";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { notify } from "~/components/Notification";
 import { getImageUrl } from "~/utils/helpers";
+import { updateEventSchema } from "~/schemas/schemas";
 
 export default function OrganizerViewEvent() {
 	const { id } = useParams();
@@ -20,6 +21,7 @@ export default function OrganizerViewEvent() {
 	const [isSaving, setIsSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
 
 	const fetchEvent = useCallback(async () => {
 		setLoading(true);
@@ -80,6 +82,20 @@ export default function OrganizerViewEvent() {
 
 	const handleSave = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setValidationErrors({});
+
+		const validationResult = updateEventSchema.safeParse(editData);
+
+		if (!validationResult.success) {
+			const fieldErrors = validationResult.error.flatten().fieldErrors;
+			const errors: { [key: string]: string } = {};
+			for (const key in fieldErrors) {
+				errors[key] = fieldErrors[key as keyof typeof fieldErrors]?.[0] || "";
+			}
+			setValidationErrors(errors);
+			return;
+		}
+
 		setIsSaving(true);
 		const fd = new FormData();
 		fd.append("id", event.id.toString());
@@ -153,6 +169,7 @@ export default function OrganizerViewEvent() {
 									required
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
+								{validationErrors.title && <span className="text-brand text-[11px] mt-1">{validationErrors.title}</span>}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Location</label>
@@ -163,6 +180,7 @@ export default function OrganizerViewEvent() {
 									onChange={handleEditChange}
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
+								{validationErrors.location && <span className="text-brand text-[11px] mt-1">{validationErrors.location}</span>}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Date</label>
@@ -174,6 +192,9 @@ export default function OrganizerViewEvent() {
 									required
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 								/>
+								{validationErrors.event_start_date && (
+									<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_date}</span>
+								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Time</label>
@@ -185,6 +206,9 @@ export default function OrganizerViewEvent() {
 									onChange={handleEditChange}
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 								/>
+								{validationErrors.event_start_time && (
+									<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_time}</span>
+								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Max Participants (Optional)</label>
@@ -195,6 +219,9 @@ export default function OrganizerViewEvent() {
 									onChange={handleEditChange}
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
+								{validationErrors.max_participants && (
+									<span className="text-brand text-[11px] mt-1">{validationErrors.max_participants}</span>
+								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Organizer</label>
@@ -204,6 +231,9 @@ export default function OrganizerViewEvent() {
 									disabled
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-muted outline-none cursor-not-allowed"
 								/>
+								{validationErrors.organizer_id && (
+									<span className="text-brand text-[11px] mt-1">{validationErrors.organizer_id}</span>
+								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Status</label>
@@ -219,6 +249,7 @@ export default function OrganizerViewEvent() {
 									<option value="completed">Completed</option>
 									<option value="cancelled">Cancelled</option>
 								</select>
+								{validationErrors.status && <span className="text-brand text-[11px] mt-1">{validationErrors.status}</span>}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Event Image</label>
@@ -242,6 +273,7 @@ export default function OrganizerViewEvent() {
 								onChange={handleEditChange}
 								rows={5}
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"></textarea>
+							{validationErrors.description && <span className="text-brand text-[11px] mt-1">{validationErrors.description}</span>}
 						</div>
 						<div className="flex justify-end gap-4 mt-4">
 							<button

@@ -39,12 +39,12 @@ export default function NotificationContainer() {
 			{notifications.map((n) => (
 				<div
 					key={n.id}
-					className={`px-5 py-3.5 rounded-[2px] shadow-dropdown font-mono text-[11px] tracking-[0.05em] uppercase flex items-center justify-between gap-4 fade-in-element transition-all pointer-events-auto min-w-[280px] max-w-[400px] ${
+					className={`px-5 py-3.5 rounded-[2px] shadow-[0_10px_40px_rgba(0,0,0,0.8)] font-mono text-[11px] tracking-[0.05em] uppercase flex items-center justify-between gap-4 fade-in-element transition-all pointer-events-auto min-w-[280px] max-w-[400px] z-[9999] ${
 						n.type === "success"
-							? "bg-success-bg text-success-text border border-[rgba(60,130,60,0.3)]"
+							? "bg-[#0d2214] text-[#4ade80] border border-[#16a34a]"
 							: n.type === "error"
-								? "bg-danger-bg text-danger-text border border-[rgba(200,64,30,0.3)]"
-								: "bg-surface-secondary text-text-primary border border-border"
+								? "bg-[#2b1010] text-[#f87171] border border-[#dc2626]"
+								: "bg-[#1a1a0f] text-text-primary border border-brand"
 					}`}>
 					<span>{n.message}</span>
 					<button

@@ -2,6 +2,7 @@
 include_once "../core/header.php";
 include "../../database/db.php";
 include_once "../../logging/logging.php";
+require_once "../../helpers/validation.php";
 
 if (session_status() === PHP_SESSION_NONE) {
 	session_start();
@@ -15,14 +16,21 @@ try {
 
 	$data = json_decode($raw_input, true);
 
-	if (
-		empty($data["email"]) ||
-		empty($data["password"])
-	) {
-		Logger::log("Missing email or password.");
+	$errors = [];
+
+	if (!Validator::email($data["email"] ?? '')) {
+		$errors['email'] = "A valid email is required.";
+	}
+	if (!Validator::string($data["password"] ?? '')) {
+		$errors['password'] = "Password is required.";
+	}
+
+	if (!empty($errors)) {
+		Logger::log("Login validation failed: " . json_encode($errors));
 		echo json_encode([
 			"success" => false,
-			"message" => "Email and password required"
+			"message" => "Validation failed",
+			"errors" => $errors
 		]);
 		exit;
 	}
@@ -30,17 +38,6 @@ try {
 	$email = trim($data["email"]);
 	$password = $data["password"];
 
-	// Validate email format
-	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		Logger::log("Invalid email format: " . $email);
-		echo json_encode([
-			"success" => false,
-			"message" => "Invalid credentials"
-		]);
-		exit;
-	}
-
-	// Prepared statement
 	$stmt = $conn->prepare("
 		SELECT
 			id,
@@ -51,7 +48,7 @@ try {
 			organization,
 			role,
 			status
-		FROM organizers
+		FROM users
 		WHERE email = ?
 		LIMIT 1
 	");
@@ -67,10 +64,15 @@ try {
 
 	$stmt->bind_param("s", $email);
 	$stmt->execute();
-
 	$result = $stmt->get_result();
 
-	if ($result->num_rows === 0) {
+	$user = null;
+
+	if ($result->num_rows > 0) {
+		$user = $result->fetch_assoc();
+	}
+
+	if (!$user) {
 		Logger::log("Login failed: Email not found. Email: " . $email);
 		echo json_encode([
 			"success" => false,
@@ -81,8 +83,6 @@ try {
 		$conn->close();
 		exit;
 	}
-
-	$user = $result->fetch_assoc();
 
 	// Verify password hash
 	if (!password_verify($password, $user["password"])) {

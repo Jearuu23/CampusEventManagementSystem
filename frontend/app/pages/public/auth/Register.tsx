@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { RegisterOrganizer } from "~/api/user";
+import { registerSchema } from "~/schemas/schemas";
 
 export default function Register() {
 	const navigate = useNavigate();
@@ -11,18 +12,33 @@ export default function Register() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
+	const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
+		setValidationErrors({});
+
+		const validationResult = registerSchema.safeParse({
+			first_name: firstName,
+			last_name: lastName,
+			organization: org,
+			email,
+			password,
+		});
+
+		if (!validationResult.success) {
+			const fieldErrors = validationResult.error.flatten().fieldErrors;
+			const errors: { [key: string]: string } = {};
+			for (const key in fieldErrors) {
+				errors[key] = fieldErrors[key as keyof typeof fieldErrors]?.[0] || "";
+			}
+			setValidationErrors(errors);
+			return;
+		}
+
 		try {
-			const data = await RegisterOrganizer({
-				first_name: firstName,
-				last_name: lastName,
-				email,
-				password,
-				organization: org,
-			});
+			const data = await RegisterOrganizer(validationResult.data);
 			if (data.success) {
 				alert("Registration successful! Your account is pending admin approval.");
 				navigate("/login");
@@ -90,6 +106,7 @@ export default function Register() {
 									onChange={(e) => setFirstName(e.target.value)}
 									className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
+								{validationErrors.first_name && <span className="text-brand text-[11px] mt-1">{validationErrors.first_name}</span>}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label htmlFor="lastName" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
@@ -103,6 +120,7 @@ export default function Register() {
 									onChange={(e) => setLastName(e.target.value)}
 									className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
+								{validationErrors.last_name && <span className="text-brand text-[11px] mt-1">{validationErrors.last_name}</span>}
 							</div>
 						</div>
 
@@ -119,6 +137,7 @@ export default function Register() {
 								placeholder="e.g. Student Council"
 								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
+							{validationErrors.organization && <span className="text-brand text-[11px] mt-1">{validationErrors.organization}</span>}
 						</div>
 
 						<div className="flex flex-col gap-2">
@@ -134,6 +153,7 @@ export default function Register() {
 								placeholder="organizer@university.edu"
 								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors placeholder:text-text-muted/50"
 							/>
+							{validationErrors.email && <span className="text-brand text-[11px] mt-1">{validationErrors.email}</span>}
 						</div>
 
 						<div className="flex flex-col gap-2">
@@ -148,6 +168,7 @@ export default function Register() {
 								onChange={(e) => setPassword(e.target.value)}
 								className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 							/>
+							{validationErrors.password && <span className="text-brand text-[11px] mt-1">{validationErrors.password}</span>}
 						</div>
 
 						<div className="pt-2">

@@ -1,6 +1,7 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 if (session_status() === PHP_SESSION_NONE) {
 	session_start();
@@ -21,8 +22,18 @@ if ($method === 'PUT') {
 	$participant_id = $data['participant_id'] ?? null;
 	$status = $data['status'] ?? null;
 
-	if (!$event_id || !$participant_id || !$status) {
-		echo json_encode(["success" => false, "message" => "Missing required fields"]);
+	$errors = [];
+	if (!Validator::int($event_id)) {
+		$errors['event_id'] = "Valid Event ID is required.";
+	}
+	if (!Validator::int($participant_id)) {
+		$errors['participant_id'] = "Valid Participant ID is required.";
+	}
+	if (!Validator::string($status)) {
+		$errors['status'] = "Status is required.";
+	}
+	if (!empty($errors)) {
+		echo json_encode(["success" => false, "message" => "Validation failed", "errors" => $errors]);
 		exit;
 	}
 

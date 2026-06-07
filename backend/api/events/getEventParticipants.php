@@ -1,6 +1,7 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 session_start();
 if (!isset($_SESSION["user_id"])) {
@@ -11,10 +12,16 @@ if (!isset($_SESSION["user_id"])) {
 	exit;
 }
 
-if (!isset($_GET['event_id']) || empty(trim($_GET['event_id']))) {
+$errors = [];
+if (!Validator::int($_GET['event_id'] ?? null)) {
+	$errors['event_id'] = "Valid Event ID is required.";
+}
+
+if (!empty($errors)) {
 	echo json_encode([
 		"success" => false,
-		"message" => "Event ID is required"
+		"message" => "Validation failed",
+		"errors" => $errors
 	]);
 	exit;
 }
@@ -60,9 +67,10 @@ $query = "
         p.phone, 
         p.organization, 
         er.status, 
-        er.registered_at
+        er.registered_at,
+        er.points
     FROM event_registrations er
-    JOIN participants p ON er.participant_id = p.id
+    JOIN users p ON er.participant_id = p.id
     WHERE er.event_id = ?
     ORDER BY er.registered_at DESC
 ";

@@ -4,6 +4,7 @@ ini_set('display_errors', 1); // Expose errors to frontend console instead of re
 
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 header('Content-Type: application/json');
 
@@ -23,7 +24,7 @@ if ($method === 'GET') {
 				er.status 
 			  FROM event_registrations er
 			  JOIN events e ON er.event_id = e.id
-			  JOIN participants u ON er.participant_id = u.id
+			  JOIN users u ON er.participant_id = u.id
 			  WHERE 1=1";
 
 	$types = "";

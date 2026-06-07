@@ -24,9 +24,5 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export default function EventRegistration() {
-	return (
-		<RouteHandler role={UserRole.USER}>
-			<EventPage />
-		</RouteHandler>
-	);
+	return <EventPage />;
 }

@@ -1,6 +1,7 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+require_once "../../helpers/validation.php";
 
 $method = $_SERVER['REQUEST_METHOD'];
 $isGet = $method === 'GET';
@@ -58,8 +59,19 @@ if ($isGet) {
 	}
 }
 
-if (empty($event_id) || empty($email) || empty($status)) {
-	sendResponse(false, "Missing required fields. Please ensure the link is correct.", $isGet);
+$errors = [];
+if (!Validator::int($event_id ?? null)) {
+	$errors['event_id'] = "Valid Event ID is required.";
+}
+if (!Validator::email($email ?? '')) {
+	$errors['email'] = "A valid email address is required.";
+}
+if (!Validator::string($status ?? '')) {
+	$errors['status'] = "Status is required.";
+}
+
+if (!empty($errors)) {
+	sendResponse(false, "Validation failed: " . implode(', ', $errors), $isGet);
 }
 
 $allowedStatuses = ["registered", "attended", "cancelled"];
@@ -67,11 +79,8 @@ if (!in_array($status, $allowedStatuses, true)) {
 	sendResponse(false, "Invalid status provided.", $isGet);
 }
 
-// Find participant by email (fallback for variations in db schema setup)
-$participantStmt = $conn->prepare("SELECT id FROM participants WHERE email = ?");
-if (!$participantStmt) {
-	$participantStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-}
+// Find participant by email
+$participantStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 
 if (!$participantStmt) {
 	sendResponse(false, "Database error: unable to prepare query.", $isGet);
@@ -93,9 +102,6 @@ $participantStmt->close();
 
 // Update participation status
 $updateStmt = $conn->prepare("UPDATE event_registrations SET status = ? WHERE event_id = ? AND participant_id = ?");
-if (!$updateStmt) {
-	$updateStmt = $conn->prepare("UPDATE event_registrations SET status = ? WHERE event_id = ? AND user_id = ?");
-}
 
 $updateStmt->bind_param("sii", $status, $event_id, $participant_id);
 

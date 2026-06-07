@@ -17,4 +17,8 @@ export const routeLinks = {
 	organizerViewEvent: "/organizer/view-event/:id",
 	organizerEventManagement: "/organizer/event-management",
 	organizerParticipantManagement: "/organizer/participant-management",
+
+	// Participant routes
+	participantDashboard: "/participants/dashboard",
+	participantViewEvent: "/participants/view-event/:id",
 };
