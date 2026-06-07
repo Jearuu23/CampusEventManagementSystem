@@ -1,16 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Event } from "~/types/events";
+import { RegisterForEvent } from "~/api/events";
+import { notify } from "~/components/Notification";
 
 export default function RegistrationForm({ event }: { event?: Event }) {
+	const [formData, setFormData] = useState({
+		first_name: "",
+		last_name: "",
+		email: "",
+		phone: "",
+		organization: "",
+	});
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
 	if (!event) return null;
 
 	const isFull = event.max_participants && (event.current_participants || 0) >= event.max_participants;
 	const isClosed = event.status === "completed" || event.status === "cancelled" || event.status === "rejected";
-	const isDisabled = isFull || isClosed;
+	const isDisabled = isFull || isClosed || isSubmitting;
 
 	let buttonText = "Confirm Registration";
 	if (isClosed) buttonText = "Registration Closed";
 	else if (isFull) buttonText = "Event Full";
+	else if (isSubmitting) buttonText = "Registering...";
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (isDisabled) return;
+
+		setIsSubmitting(true);
+		const res = await RegisterForEvent({ event_id: event.id, ...formData });
+
+		if (res.success) {
+			notify(res.message, "success");
+			setFormData({ first_name: "", last_name: "", email: "", phone: "", organization: "" });
+		} else {
+			notify(res.message || "Failed to register.", "error");
+		}
+		setIsSubmitting(false);
+	};
 
 	return (
 		<div className="bg-surface-secondary border border-border p-8 md:p-10 sticky top-24 fade-in-element">
@@ -19,12 +51,15 @@ export default function RegistrationForm({ event }: { event?: Event }) {
 			</div>
 			<h3 className="font-serif text-[24px] font-bold mb-8">Registration</h3>
 
-			<form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+			<form className="flex flex-col gap-6" onSubmit={handleSubmit}>
 				<div className="grid grid-cols-2 gap-6">
 					<div className="flex flex-col gap-2">
 						<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">First Name *</label>
 						<input
 							type="text"
+							name="first_name"
+							value={formData.first_name}
+							onChange={handleChange}
 							required
 							className="bg-transparent border-b border-border-strong pb-2 text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 							placeholder="Jane"
@@ -34,6 +69,9 @@ export default function RegistrationForm({ event }: { event?: Event }) {
 						<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Last Name *</label>
 						<input
 							type="text"
+							name="last_name"
+							value={formData.last_name}
+							onChange={handleChange}
 							required
 							className="bg-transparent border-b border-border-strong pb-2 text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 							placeholder="Doe"
@@ -44,6 +82,9 @@ export default function RegistrationForm({ event }: { event?: Event }) {
 					<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Email Address *</label>
 					<input
 						type="email"
+						name="email"
+						value={formData.email}
+						onChange={handleChange}
 						required
 						className="bg-transparent border-b border-border-strong pb-2 text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 						placeholder="jane.doe@university.edu"
@@ -53,14 +94,20 @@ export default function RegistrationForm({ event }: { event?: Event }) {
 					<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Phone Number</label>
 					<input
 						type="tel"
+						name="phone"
+						value={formData.phone}
+						onChange={handleChange}
 						className="bg-transparent border-b border-border-strong pb-2 text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
-						placeholder="+1 (555) 000-0000"
+						placeholder="+63 000 0000 000"
 					/>
 				</div>
 				<div className="flex flex-col gap-2">
 					<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Organization / Department</label>
 					<input
 						type="text"
+						name="organization"
+						value={formData.organization}
+						onChange={handleChange}
 						className="bg-transparent border-b border-border-strong pb-2 text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 						placeholder="Computer Science Dept."
 					/>

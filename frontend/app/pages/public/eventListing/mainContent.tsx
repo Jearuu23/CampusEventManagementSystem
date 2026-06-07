@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLoaderData, useSearchParams } from "react-router";
 import { MapPinIcon, ClockIcon, UsersIcon } from "~/components/Icons";
+import { IMG_URL } from "~/api/constant";
 
 export default function MainContent({ viewMode }: { viewMode: "list" | "grid" }) {
 	const { events, total, page, limit } = useLoaderData() as { events: any[]; total: number; page: number; limit: number };
@@ -18,6 +19,13 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 		newParams.set("page", newPage.toString());
 		setSearchParams(newParams);
 		window.scrollTo({ top: 0, behavior: "smooth" });
+	};
+
+	const getImageUrl = (path?: string) => {
+		if (!path) return "";
+		if (path.startsWith("http")) return path;
+		const filename = path.split(/[/\\]/).pop();
+		return `${IMG_URL}${filename}`;
 	};
 
 	return (
@@ -71,7 +79,11 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 					</div>
 					<div className="bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] relative flex items-center justify-center overflow-hidden min-h-[160px] md:min-h-full">
 						{featuredEvent.image_path ? (
-							<img src={featuredEvent.image_path} alt={featuredEvent.title} className="w-full h-full object-cover opacity-60" />
+							<img
+								src={getImageUrl(featuredEvent.image_path)}
+								alt={featuredEvent.title}
+								className="w-full h-full object-cover opacity-60"
+							/>
 						) : (
 							<svg width="100" height="100" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-20">
 								<circle cx="40" cy="40" r="30" stroke="#a8873a" strokeWidth="1" />
@@ -152,7 +164,7 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 									key={event.id || i}
 									id={event.id}
 									bg={bgs[i % bgs.length]}
-									imagePath={event.image_path}
+									imagePath={getImageUrl(event.image_path)}
 									svg={
 										<svg width="60" height="60" viewBox="0 0 80 80" fill="none" opacity="0.25">
 											<circle cx="40" cy="40" r="30" stroke="#a8873a" strokeWidth="1" />

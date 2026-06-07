@@ -1,9 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EventsTab from "./eventsTab";
 import OrganizersTab from "./organizersTab";
+import { useSearchParams } from "react-router";
 
 export default function EventManagement() {
-	const [activeTab, setActiveTab] = useState<"events" | "organizers">("events");
+	const [searchParams, setSearchParams] = useSearchParams();
+	const tabParam = searchParams.get("tab");
+
+	const [activeTab, setActiveTab] = useState<"events" | "organizers">(tabParam === "organizers" ? "organizers" : "events");
+
+	useEffect(() => {
+		if (tabParam === "events" || tabParam === "organizers") {
+			setActiveTab(tabParam);
+		}
+	}, [tabParam]);
+
+	const handleTabChange = (tab: "events" | "organizers") => {
+		setActiveTab(tab);
+		const newParams = new URLSearchParams(searchParams);
+		newParams.set("tab", tab);
+		setSearchParams(newParams);
+	};
 
 	return (
 		<div className="w-full bg-background min-h-screen">
@@ -22,7 +39,7 @@ export default function EventManagement() {
 								? "border-b-2 border-brand text-text-primary"
 								: "border-b-2 border-transparent text-text-muted hover:text-text-primary"
 						}`}
-						onClick={() => setActiveTab("events")}>
+						onClick={() => handleTabChange("events")}>
 						Events
 					</button>
 					<button
@@ -31,7 +48,7 @@ export default function EventManagement() {
 								? "border-b-2 border-brand text-text-primary"
 								: "border-b-2 border-transparent text-text-muted hover:text-text-primary"
 						}`}
-						onClick={() => setActiveTab("organizers")}>
+						onClick={() => handleTabChange("organizers")}>
 						Organizers
 					</button>
 				</div>

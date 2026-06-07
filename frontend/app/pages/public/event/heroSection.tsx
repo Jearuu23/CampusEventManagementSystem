@@ -1,10 +1,18 @@
 import React from "react";
 import type { Event } from "~/types/events";
+import { IMG_URL } from "~/api/constant";
 
 export default function HeroSection({ event }: { event?: Event }) {
 	const displayDate = event?.event_start_date
 		? new Date(event.event_start_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 		: "TBA";
+
+	const getImageUrl = (path?: string) => {
+		if (!path) return "";
+		if (path.startsWith("http")) return path;
+		const filename = path.split(/[/\\]/).pop();
+		return `${IMG_URL}${filename}`;
+	};
 
 	return (
 		<section className="bg-text-primary min-h-[50vh] flex flex-col justify-end px-8 md:px-20 pt-32 pb-16 relative overflow-hidden">
@@ -23,7 +31,7 @@ export default function HeroSection({ event }: { event?: Event }) {
 			</div>
 			<div className="absolute inset-0 bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] flex items-center justify-center -z-10">
 				{event?.image_path ? (
-					<img src={event.image_path} alt={event?.title} className="w-full h-full object-cover opacity-30" />
+					<img src={getImageUrl(event.image_path)} alt={event?.title} className="w-full h-full object-cover opacity-30" />
 				) : (
 					<svg width="240" height="240" viewBox="0 0 80 80" fill="none" className="opacity-10">
 						<circle cx="40" cy="40" r="30" stroke="#a8873a" strokeWidth="1" />

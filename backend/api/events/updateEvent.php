@@ -19,7 +19,7 @@ if (empty($data)) {
 if (
 	empty($data["id"]) ||
 	empty($data["title"]) ||
-	empty($data["event_date"]) ||
+	(empty($data["event_date"]) && empty($data["event_start_date"])) ||
 	empty($data["organizer_id"])
 ) {
 	echo json_encode([
@@ -32,11 +32,13 @@ if (
 $id = intval($data["id"]);
 $title = trim($data["title"]);
 $description = isset($data["description"]) ? trim($data["description"]) : null;
-$event_date = trim($data["event_date"]);
-$event_time = isset($data["event_time"]) ? trim($data["event_time"]) : null;
+$event_start_date = isset($data["event_start_date"]) ? trim($data["event_start_date"]) : trim($data["event_date"]);
+$event_start_time = isset($data["event_time"]) ? trim($data["event_time"]) : (isset($data["event_start_time"]) ? trim($data["event_start_time"]) : "00:00:00");
+$event_end_date = isset($data["event_end_date"]) ? trim($data["event_end_date"]) : $event_start_date;
+$event_end_time = isset($data["event_end_time"]) ? trim($data["event_end_time"]) : $event_start_time;
 $location = isset($data["location"]) ? trim($data["location"]) : null;
 $max_participants = isset($data["max_participants"]) ? intval($data["max_participants"]) : null;
-$status = isset($data["status"]) ? trim($data["status"]) : "draft";
+$status = isset($data["status"]) ? trim($data["status"]) : "pending";
 $organizer_id = intval($data["organizer_id"]);
 
 if ($_SESSION["role"] !== "admin" && $_SESSION["user_id"] !== $organizer_id) {
@@ -47,7 +49,7 @@ if ($_SESSION["role"] !== "admin" && $_SESSION["user_id"] !== $organizer_id) {
 	exit;
 }
 
-$allowedStatuses = ["draft", "published", "ongoing", "completed", "cancelled"];
+$allowedStatuses = ["pending", "approved", "rejected", "ongoing", "completed", "cancelled"];
 if (!in_array($status, $allowedStatuses, true)) {
 	echo json_encode([
 		"success" => false,
@@ -56,24 +58,7 @@ if (!in_array($status, $allowedStatuses, true)) {
 	exit;
 }
 
-$dateTime = DateTime::createFromFormat("Y-m-d H:i:s", $event_date);
-if (!$dateTime) {
-	echo json_encode([
-		"success" => false,
-		"message" => "Invalid event_date format. Use YYYY-MM-DD HH:MM:SS"
-	]);
-	exit;
-}
-
-if ($event_time !== null && !DateTime::createFromFormat("H:i:s", $event_time)) {
-	echo json_encode([
-		"success" => false,
-		"message" => "Invalid event_time format. Use HH:MM:SS"
-	]);
-	exit;
-}
-
-$checkStmt = $conn->prepare("SELECT id FROM events WHERE id = ? AND organizer_id = ?");
+$checkStmt = $conn->prepare("SELECT id, status FROM events WHERE id = ? AND organizer_id = ?");
 $checkStmt->bind_param("ii", $id, $organizer_id);
 $checkStmt->execute();
 $checkResult = $checkStmt->get_result();
@@ -82,6 +67,17 @@ if ($checkResult->num_rows === 0) {
 	echo json_encode([
 		"success" => false,
 		"message" => "Event not found or unauthorized to update"
+	]);
+	$checkStmt->close();
+	$conn->close();
+	exit;
+}
+
+$eventRow = $checkResult->fetch_assoc();
+if (in_array($eventRow['status'], ['completed', 'cancelled'])) {
+	echo json_encode([
+		"success" => false,
+		"message" => "Cannot edit a completed or cancelled event"
 	]);
 	$checkStmt->close();
 	$conn->close();
@@ -113,14 +109,14 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
 
 if ($image_updated) {
 	$updateStmt = $conn->prepare(
-		"UPDATE events SET title = ?, description = ?, event_date = ?, event_time = ?, location = ?, max_participants = ?, status = ?, image_path = ? WHERE id = ?"
+		"UPDATE events SET title = ?, description = ?, event_start_date = ?, event_start_time = ?, event_end_date = ?, event_end_time = ?, location = ?, max_participants = ?, status = ?, image_path = ? WHERE id = ?"
 	);
-	$updateStmt->bind_param("sssssissi", $title, $description, $event_date, $event_time, $location, $max_participants, $status, $image_path, $id);
+	$updateStmt->bind_param("sssssssissi", $title, $description, $event_start_date, $event_start_time, $event_end_date, $event_end_time, $location, $max_participants, $status, $image_path, $id);
 } else {
 	$updateStmt = $conn->prepare(
-		"UPDATE events SET title = ?, description = ?, event_date = ?, event_time = ?, location = ?, max_participants = ?, status = ? WHERE id = ?"
+		"UPDATE events SET title = ?, description = ?, event_start_date = ?, event_start_time = ?, event_end_date = ?, event_end_time = ?, location = ?, max_participants = ?, status = ? WHERE id = ?"
 	);
-	$updateStmt->bind_param("sssssisi", $title, $description, $event_date, $event_time, $location, $max_participants, $status, $id);
+	$updateStmt->bind_param("sssssssisi", $title, $description, $event_start_date, $event_start_time, $event_end_date, $event_end_time, $location, $max_participants, $status, $id);
 }
 
 if ($updateStmt->execute()) {

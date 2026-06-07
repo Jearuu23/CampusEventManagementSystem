@@ -1,6 +1,7 @@
 <?php
 include_once "../core/header.php";
 include "../../database/db.php";
+include_once "../../logging/logging.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 if (empty($data)) {
@@ -92,12 +93,20 @@ if ($registerStmt->execute()) {
 	$subject = "Event Registration Confirmation: " . $eventTitle;
 	$message = "Hello $first_name $last_name,\n\nYou have successfully registered for the event: '$eventTitle'.\n\nIf you need to cancel your registration, please click the link below:\n$cancelLink\n\nThank you!";
 	$headers = "From: noreply@university.edu\r\n";
+	$headers .= "Reply-To: noreply@university.edu\r\n";
+	$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-	@mail($email, $subject, $message, $headers);
+	// Attempt to send the email
+	$mailSent = @mail($email, $subject, $message, $headers);
+	if ($mailSent) {
+		Logger::log("Email successfully sent to: " . $email);
+	} else {
+		Logger::log("Failed to send email to: " . $email . ". Check XAMPP sendmail/SMTP config. Simulated Email Body:\n" . $message);
+	}
 
 	echo json_encode([
 		"success" => true,
-		"message" => "Successfully registered for the event. A confirmation email has been sent."
+		"message" => "Successfully registered for the event." . ($mailSent ? " A confirmation email has been sent." : " (Email simulated locally).")
 	]);
 } else {
 	if ($conn->errno === 1062) { // 1062 is MySQL duplicate entry error code

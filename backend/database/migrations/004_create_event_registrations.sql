@@ -2,8 +2,8 @@ CREATE TABLE IF NOT EXISTS event_registrations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     event_id INT NOT NULL,
     participant_id INT NOT NULL,
-    status ENUM('registered', 'cancelled', 'attended')
-        DEFAULT 'registered',
+    status ENUM('pending','registered', 'cancelled', 'attended')
+        DEFAULT 'pending',
     registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,

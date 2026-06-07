@@ -62,3 +62,12 @@ export interface Participant {
 	email: string;
 	status: string;
 }
+
+export interface RegisterEventPayload {
+	event_id: number;
+	first_name: string;
+	last_name: string;
+	email: string;
+	phone?: string;
+	organization?: string;
+}

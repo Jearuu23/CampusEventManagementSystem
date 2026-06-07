@@ -1,6 +1,5 @@
 import { NavLink, useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth/AuthContext";
-import { UserRole } from "~/types/user";
 import { routeLinks } from "~/constants";
 
 export default function Sidebar() {
@@ -12,10 +11,12 @@ export default function Sidebar() {
 		navigate(routeLinks.home);
 	};
 
+	const isAdmin = userRole === "admin";
+
 	const dashboardLinks = [
 		{
 			name: "Dashboard",
-			path: routeLinks.adminDashboard,
+			path: isAdmin ? routeLinks.adminDashboard : routeLinks.organizerDashboard,
 			icon: (
 				<svg
 					width="18"
@@ -35,7 +36,7 @@ export default function Sidebar() {
 		},
 		{
 			name: "Event Management",
-			path: routeLinks.adminEventManagement,
+			path: isAdmin ? routeLinks.adminEventManagement : routeLinks.organizerEventManagement,
 			icon: (
 				<svg
 					width="18"
@@ -53,26 +54,30 @@ export default function Sidebar() {
 				</svg>
 			),
 		},
-		{
-			name: "Participant Mgmt",
-			path: routeLinks.adminParticipantManagement,
-			icon: (
-				<svg
-					width="18"
-					height="18"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="2"
-					strokeLinecap="round"
-					strokeLinejoin="round">
-					<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-					<circle cx="9" cy="7" r="4"></circle>
-					<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-					<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-				</svg>
-			),
-		},
+		...(isAdmin
+			? [
+					{
+						name: "Participant Mgmt",
+						path: routeLinks.adminParticipantManagement,
+						icon: (
+							<svg
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round">
+								<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+								<circle cx="9" cy="7" r="4"></circle>
+								<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+								<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+							</svg>
+						),
+					},
+				]
+			: []),
 	];
 
 	return (

@@ -1,48 +1,56 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
 import { GetEventById, GetParticipants, UpdateEventDetails } from "~/api/events";
-import { GetOrganizers } from "~/api/user";
-import EventHeader from "./eventHeader";
-import EventDetails from "./eventDetails";
+import EventHeader from "~/pages/admin/viewEvent/eventHeader";
+import EventDetails from "~/pages/admin/viewEvent/eventDetails";
+import { useAuth } from "~/contexts/auth/AuthContext";
 import { notify } from "~/components/Notification";
 import { IMG_URL } from "~/api/constant";
 
-export default function ViewEvent() {
+export default function OrganizerViewEvent() {
 	const { id } = useParams();
 	const navigate = useNavigate();
+	const { user } = useAuth();
 
 	const [event, setEvent] = useState<any>(null);
 	const [participants, setParticipants] = useState<any[]>([]);
-	const [organizers, setOrganizers] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editData, setEditData] = useState<any>({});
 	const [isSaving, setIsSaving] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	const [imageFile, setImageFile] = useState<File | null>(null);
 
 	const fetchEvent = useCallback(async () => {
 		setLoading(true);
-		const [res, partsRes, orgsRes] = await Promise.all([GetEventById(Number(id)), GetParticipants({ event_id: Number(id) }), GetOrganizers()]);
+		setError(null);
+		const [res, partsRes] = await Promise.all([GetEventById(Number(id)), GetParticipants({ event_id: Number(id) })]);
 
 		if (res.success && res.data) {
-			setEvent(res.data);
+			// Ensure the logged-in user is the organizer
+			if (res.data.organizer_id !== user?.id) {
+				setError("Unauthorized: You can only view and edit your own events.");
+			} else {
+				setEvent(res.data);
+			}
+		} else {
+			setError("Event not found.");
 		}
+
 		if (partsRes && partsRes.success !== false) {
 			setParticipants(partsRes.data || (Array.isArray(partsRes) ? partsRes : []));
 		}
-		if (orgsRes && orgsRes.success && orgsRes.data) {
-			setOrganizers(orgsRes.data);
-		}
 		setLoading(false);
-	}, [id]);
+	}, [id, user]);
 
 	useEffect(() => {
-		if (!id) {
+		if (!id || !user?.id) {
+			if (!user?.id) return; // Wait for user to be available
 			setLoading(false);
 			return;
 		}
 		fetchEvent();
-	}, [id, fetchEvent]);
+	}, [id, user, fetchEvent]);
 
 	useEffect(() => {
 		if (event) {
@@ -79,11 +87,11 @@ export default function ViewEvent() {
 		fd.append("description", editData.description);
 		fd.append("location", editData.location);
 		if (editData.max_participants) fd.append("max_participants", editData.max_participants.toString());
+
+		// Organizers have restricted status options, but include it.
 		fd.append("status", editData.status);
+
 		fd.append("organizer_id", editData.organizer_id.toString());
-		if (imageFile) {
-			fd.append("image", imageFile);
-		}
 
 		fd.append("event_start_date", editData.event_start_date);
 
@@ -104,6 +112,10 @@ export default function ViewEvent() {
 
 	if (loading) {
 		return <div className="p-12 font-mono text-[13px] text-text-muted">Loading event details...</div>;
+	}
+
+	if (error) {
+		return <div className="p-12 font-mono text-[13px] text-brand">{error}</div>;
 	}
 
 	if (!event) {
@@ -193,19 +205,12 @@ export default function ViewEvent() {
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Organizer</label>
-								<select
-									name="organizer_id"
-									value={editData.organizer_id}
-									onChange={handleEditChange}
-									required
-									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors">
-									<option value="">Select Organizer</option>
-									{organizers.map((org) => (
-										<option key={org.id} value={org.id}>
-											{org.name} ({org.org})
-										</option>
-									))}
-								</select>
+								<input
+									type="text"
+									value={event?.organizer_name || "Unknown"}
+									disabled
+									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-muted outline-none cursor-not-allowed"
+								/>
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Status</label>

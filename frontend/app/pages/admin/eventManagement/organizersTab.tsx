@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { GetOrganizers, UpdateOrganizerStatus } from "~/api/user";
+import ModalManageOrganizer from "./modalManageOrganizer";
+import { notify } from "~/components/Notification";
 
 export default function OrganizersTab() {
 	const [filter, setFilter] = useState("all");
 	const [searchQuery, setSearchQuery] = useState("");
+	const [sortField, setSortField] = useState("name");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 	const [organizers, setOrganizers] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedOrganizer, setSelectedOrganizer] = useState<any>(null);
 
 	useEffect(() => {
 		const fetchOrganizers = async () => {
@@ -23,9 +29,28 @@ export default function OrganizersTab() {
 		const res = await UpdateOrganizerStatus(id, action);
 		if (res.success) {
 			setOrganizers(organizers.map((o) => (o.id === id ? { ...o, status: action } : o)));
+			notify(`Organizer successfully ${action}.`, "success");
 		} else {
-			alert(res.message || "Failed to update organizer status");
+			notify(res.message || "Failed to update organizer status", "error");
 		}
+	};
+
+	const handleManage = (org: any) => {
+		setSelectedOrganizer(org);
+		setIsModalOpen(true);
+	};
+
+	const handleSaveOrganizer = async (id: number, data: any) => {
+		if (data.status !== selectedOrganizer.status) {
+			const res = await UpdateOrganizerStatus(id, data.status);
+			if (!res.success) {
+				notify(res.message || "Failed to update organizer status", "error");
+			} else {
+				notify("Organizer status updated", "success");
+			}
+		}
+		setOrganizers(organizers.map((o) => (o.id === id ? { ...o, ...data } : o)));
+		setIsModalOpen(false);
 	};
 
 	const filteredOrganizers = organizers.filter((o) => {
@@ -38,6 +63,14 @@ export default function OrganizersTab() {
 			o.email?.toLowerCase().includes(searchLower);
 
 		return matchesStatus && matchesSearch;
+	});
+
+	const sortedOrganizers = [...filteredOrganizers].sort((a, b) => {
+		const aValue = (a[sortField as keyof typeof a] || "").toString().toLowerCase();
+		const bValue = (b[sortField as keyof typeof b] || "").toString().toLowerCase();
+		if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+		if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+		return 0;
 	});
 
 	return (
@@ -59,11 +92,23 @@ export default function OrganizersTab() {
 					<option value="approved">Approved</option>
 					<option value="rejected">Rejected</option>
 				</select>
+				<select
+					className="bg-transparent border border-border p-2 font-mono text-xs uppercase text-text-primary outline-none focus:border-brand transition-colors cursor-pointer"
+					value={sortField}
+					onChange={(e) => setSortField(e.target.value)}>
+					<option value="name">Sort by Name</option>
+					<option value="org">Sort by Organization</option>
+					<option value="email">Sort by Email</option>
+					<option value="status">Sort by Status</option>
+				</select>
+				<button
+					onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+					className="bg-transparent border border-border p-2 font-mono text-xs uppercase text-text-primary outline-none focus:border-brand transition-colors cursor-pointer hover:bg-surface-secondary">
+					{sortOrder === "asc" ? "↑ Asc" : "↓ Desc"}
+				</button>
 			</div>
 
-			<div className="font-mono text-[11px] text-text-muted tracking-[0.08em] mb-4 uppercase">
-				Total organizers: {filteredOrganizers.length}
-			</div>
+			<div className="font-mono text-[11px] text-text-muted tracking-[0.08em] mb-4 uppercase">Total organizers: {sortedOrganizers.length}</div>
 
 			<div className="border border-border bg-background overflow-x-auto">
 				<table className="w-full text-left border-collapse">
@@ -83,8 +128,8 @@ export default function OrganizersTab() {
 									Loading organizers...
 								</td>
 							</tr>
-						) : filteredOrganizers.length > 0 ? (
-							filteredOrganizers.map((org) => (
+						) : sortedOrganizers.length > 0 ? (
+							sortedOrganizers.map((org) => (
 								<tr key={org.id} className="border-b border-border last:border-b-0 hover:bg-surface-secondary/30 transition-colors">
 									<td className="p-4 text-[14px] font-medium text-text-primary">{org.name}</td>
 									<td className="p-4 text-[13px] text-text-muted">{org.org}</td>
@@ -116,7 +161,9 @@ export default function OrganizersTab() {
 												</button>
 											</>
 										)}
-										<button className="text-text-primary hover:text-brand transition-colors cursor-pointer bg-transparent border-none">
+										<button
+											onClick={() => handleManage(org)}
+											className="text-text-primary hover:text-brand transition-colors cursor-pointer bg-transparent border-none">
 											Manage
 										</button>
 									</td>
@@ -132,6 +179,13 @@ export default function OrganizersTab() {
 					</tbody>
 				</table>
 			</div>
+
+			<ModalManageOrganizer
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				organizer={selectedOrganizer}
+				onSave={handleSaveOrganizer}
+			/>
 		</div>
 	);
 }

@@ -12,6 +12,7 @@ export interface User {
 	lastName: string;
 	email: string;
 	role: UserRole;
+	status?: string;
 }
 
 export type LoginCredentials = {
@@ -20,8 +21,9 @@ export type LoginCredentials = {
 };
 
 export type RegisterCredentials = {
-	firstName: string;
-	lastName: string;
+	first_name: string;
+	last_name: string;
 	email: string;
 	password: string;
+	organization?: string;
 };

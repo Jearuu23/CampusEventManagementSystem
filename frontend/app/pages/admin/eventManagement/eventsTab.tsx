@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { GetEvents, UpdateEventStatus, DeleteEvent } from "~/api/events";
 import { routeLinks } from "~/constants";
+import { notify } from "~/components/Notification";
 
 export default function EventsTab() {
 	const [filter, setFilter] = useState("all");
 	const [searchQuery, setSearchQuery] = useState("");
+	const [sortField, setSortField] = useState("date");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 	const [events, setEvents] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -25,8 +28,9 @@ export default function EventsTab() {
 		const res = await UpdateEventStatus(id, action);
 		if (res.success) {
 			setEvents(events.map((e) => (e.id === id ? { ...e, status: action } : e)));
+			notify(`Event status updated to ${action}`, "success");
 		} else {
-			alert(res.message || "Failed to update event status");
+			notify(res.message || "Failed to update event status", "error");
 		}
 	};
 
@@ -35,8 +39,9 @@ export default function EventsTab() {
 			const res = await DeleteEvent(id);
 			if (res.success) {
 				setEvents(events.filter((e) => e.id !== id));
+				notify("Event deleted successfully", "success");
 			} else {
-				alert(res.message || "Failed to delete event");
+				notify(res.message || "Failed to delete event", "error");
 			}
 		}
 	};
@@ -47,6 +52,20 @@ export default function EventsTab() {
 		const matchesSearch = !searchQuery || e.title?.toLowerCase().includes(searchLower) || e.department?.toLowerCase().includes(searchLower);
 
 		return matchesStatus && matchesSearch;
+	});
+
+	const sortedEvents = [...filteredEvents].sort((a, b) => {
+		let aValue = a[sortField as keyof typeof a] || "";
+		let bValue = b[sortField as keyof typeof b] || "";
+
+		if (sortField === "date") {
+			aValue = a.event_start_date ? new Date(a.event_start_date).getTime() : 0;
+			bValue = b.event_start_date ? new Date(b.event_start_date).getTime() : 0;
+		}
+
+		if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+		if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+		return 0;
 	});
 
 	return (
@@ -71,6 +90,20 @@ export default function EventsTab() {
 					<option value="archived">Archived</option>
 					<option value="rejected">Rejected</option>
 				</select>
+				<select
+					className="bg-transparent border border-border p-2 font-mono text-xs uppercase text-text-primary outline-none focus:border-brand transition-colors cursor-pointer"
+					value={sortField}
+					onChange={(e) => setSortField(e.target.value)}>
+					<option value="title">Sort by Title</option>
+					<option value="department">Sort by Dept</option>
+					<option value="date">Sort by Date</option>
+					<option value="status">Sort by Status</option>
+				</select>
+				<button
+					onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+					className="bg-transparent border border-border p-2 font-mono text-xs uppercase text-text-primary outline-none focus:border-brand transition-colors cursor-pointer hover:bg-surface-secondary">
+					{sortOrder === "asc" ? "↑ Asc" : "↓ Desc"}
+				</button>
 			</div>
 
 			<div className="border border-border bg-background">
@@ -91,8 +124,8 @@ export default function EventsTab() {
 									Loading events...
 								</td>
 							</tr>
-						) : filteredEvents.length > 0 ? (
-							filteredEvents.map((event) => (
+						) : sortedEvents.length > 0 ? (
+							sortedEvents.map((event) => (
 								<tr key={event.id} className="border-b border-border last:border-b-0 hover:bg-surface-secondary/30 transition-colors">
 									<td className="p-4 text-[14px] font-medium text-text-primary">{event.title}</td>
 									<td className="p-4 text-[13px] text-text-muted">{event.department || "Unknown"}</td>
@@ -142,9 +175,11 @@ export default function EventsTab() {
 												Archive
 											</button>
 										)}
-										<button className="text-text-primary hover:text-brand transition-colors cursor-pointer bg-transparent border-none">
-											Edit
-										</button>
+										{event.status !== "completed" && event.status !== "cancelled" && event.status !== "archived" && (
+											<button className="text-text-primary hover:text-brand transition-colors cursor-pointer bg-transparent border-none">
+												Edit
+											</button>
+										)}
 										<button
 											onClick={() => handleDelete(event.id)}
 											className="text-brand hover:underline transition-colors cursor-pointer bg-transparent border-none">

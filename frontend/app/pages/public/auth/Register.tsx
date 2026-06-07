@@ -24,14 +24,14 @@ export default function Register() {
 				organization: org,
 			});
 			if (data.success) {
-				alert("Registration successful! Please login.");
+				alert("Registration successful! Your account is pending admin approval.");
 				navigate("/login");
 			} else {
 				setError(data.message || "Registration failed");
 			}
 		} catch (err) {
 			console.error("Error registering:", err);
-			setError("An error occurred while communicating with the server.");
+			setError("An error occurred.");
 		}
 	};
 

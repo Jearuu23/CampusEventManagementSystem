@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth/AuthContext";
-import { UserRole } from "~/types/user";
 import { LoginUser } from "~/api/user";
 import { routeLinks } from "~/constants";
 
@@ -21,8 +20,9 @@ export default function Login() {
 
 			if (data.success) {
 				// Update context state and localStorage
-				login(data.user.role as UserRole);
-				navigate(routeLinks.adminDashboard);
+				login(data.user);
+				const link = data.user.role === "admin" ? routeLinks.adminDashboard : routeLinks.organizerDashboard;
+				navigate(link);
 			} else {
 				setError(data.message || "Login failed");
 			}
@@ -34,7 +34,6 @@ export default function Login() {
 
 	return (
 		<main className="flex flex-col lg:flex-row min-h-[calc(100vh-56px)] w-full bg-background font-sans text-text-primary">
-			{/* Left Panel - Hero/Marketing Copy */}
 			<section className="hidden lg:flex w-1/2 bg-text-primary relative items-center justify-center p-20 overflow-hidden">
 				<div className="relative z-10 w-full max-w-lg fade-in-element">
 					<div className="font-mono text-[11px] tracking-[0.2em] uppercase text-brand mb-6 flex items-center gap-3 before:content-[''] before:block before:w-8 before:h-px before:bg-brand">

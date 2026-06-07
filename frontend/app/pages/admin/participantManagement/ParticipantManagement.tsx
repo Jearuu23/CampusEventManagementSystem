@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { GetParticipants, UpdateParticipantStatus, GetEvents } from "~/api/events";
 import type { Participant, Event } from "~/types/events";
+import { notify } from "~/components/Notification";
 
 export default function ParticipantManagement() {
 	const [events, setEvents] = useState<Event[]>([]);
@@ -12,10 +13,15 @@ export default function ParticipantManagement() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [statusFilter, setStatusFilter] = useState("");
+	const [sortField, setSortField] = useState("name");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
 	const [eventSearchTerm, setEventSearchTerm] = useState("");
 	const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
 	const eventDropdownRef = useRef<HTMLDivElement>(null);
+
+	const selectedEvent = events.find((e) => e.id === selectedEventId);
+	const isEventInactive = selectedEvent && ["completed", "cancelled", "archived", "rejected"].includes(selectedEvent.status);
 
 	// Fetch events on mount to populate the dropdown
 	useEffect(() => {
@@ -85,10 +91,19 @@ export default function ParticipantManagement() {
 		const response = await UpdateParticipantStatus({ event_id, email, status });
 		if (response.success) {
 			fetchParticipants();
+			notify(`Participant status updated to ${status}`, "success");
 		} else {
-			alert(response.message || "Failed to update status");
+			notify(response.message || "Failed to update status", "error");
 		}
 	};
+
+	const sortedParticipants = [...participants].sort((a, b) => {
+		const aValue = (a[sortField as keyof typeof a] || "").toString().toLowerCase();
+		const bValue = (b[sortField as keyof typeof b] || "").toString().toLowerCase();
+		if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+		if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+		return 0;
+	});
 
 	return (
 		<div className="p-8 md:p-12">
@@ -180,9 +195,33 @@ export default function ParticipantManagement() {
 						<option value="cancelled">Cancelled</option>
 					</select>
 				</div>
+				<div className="sm:w-48 flex flex-col gap-2">
+					<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Sort By</label>
+					<div className="flex gap-2">
+						<select
+							value={sortField}
+							onChange={(e) => setSortField(e.target.value)}
+							className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors flex-1 cursor-pointer">
+							<option value="name">Name</option>
+							<option value="email">Email</option>
+							<option value="status">Status</option>
+						</select>
+						<button
+							onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+							className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors cursor-pointer hover:bg-surface-secondary">
+							{sortOrder === "asc" ? "↑" : "↓"}
+						</button>
+					</div>
+				</div>
 			</div>
 
 			{error && <div className="bg-danger-bg text-danger-text px-4 py-3 rounded-[2px] text-[13px] font-medium mb-6">{error}</div>}
+
+			{selectedEventId !== "" && !loading && (
+				<div className="font-mono text-[11px] text-text-muted tracking-[0.08em] mb-4 uppercase">
+					Total participants: {participants.length}
+				</div>
+			)}
 
 			<div className="bg-surface-secondary border border-border rounded-[4px] overflow-hidden">
 				<div className="overflow-x-auto">
@@ -194,32 +233,34 @@ export default function ParticipantManagement() {
 								</th>
 								<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium">Event</th>
 								<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium">Status</th>
-								<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium text-right">
-									Actions
-								</th>
+								{!isEventInactive && (
+									<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium text-right">
+										Actions
+									</th>
+								)}
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-border">
 							{selectedEventId === "" ? (
 								<tr>
-									<td colSpan={4} className="px-6 py-12 text-center text-[13px] text-text-muted font-medium">
+									<td colSpan={isEventInactive ? 3 : 4} className="px-6 py-12 text-center text-[13px] text-text-muted font-medium">
 										Please select an event from the dropdown to view its participants.
 									</td>
 								</tr>
 							) : loading ? (
 								<tr>
-									<td colSpan={4} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
+									<td colSpan={isEventInactive ? 3 : 4} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
 										Loading participants...
 									</td>
 								</tr>
 							) : participants.length === 0 ? (
 								<tr>
-									<td colSpan={4} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
+									<td colSpan={isEventInactive ? 3 : 4} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
 										No participants found matching your criteria.
 									</td>
 								</tr>
 							) : (
-								participants.map((p, idx) => (
+								sortedParticipants.map((p, idx) => (
 									<tr key={`${p.event_id}-${p.email}-${idx}`} className="hover:bg-white/5 transition-colors group">
 										<td className="px-6 py-4">
 											<div className="text-[14px] text-text-primary font-medium">{p.name || "N/A"}</div>
@@ -247,24 +288,26 @@ export default function ParticipantManagement() {
 												{p.status}
 											</span>
 										</td>
-										<td className="px-6 py-4 text-right">
-											<div className="flex items-center justify-end gap-2">
-												{p.status !== "attended" && (
-													<button
-														onClick={() => handleStatusUpdate(p.event_id, p.email, "attended")}
-														className="px-3 py-1.5 bg-success-bg text-success-text hover:bg-success hover:text-background rounded-[2px] text-[11px] font-medium tracking-[0.05em] uppercase transition-colors cursor-pointer border-none">
-														Attended
-													</button>
-												)}
-												{p.status !== "cancelled" && (
-													<button
-														onClick={() => handleStatusUpdate(p.event_id, p.email, "cancelled")}
-														className="px-3 py-1.5 bg-danger-bg text-danger-text hover:bg-danger hover:text-background rounded-[2px] text-[11px] font-medium tracking-[0.05em] uppercase transition-colors cursor-pointer border-none">
-														Cancel
-													</button>
-												)}
-											</div>
-										</td>
+										{!isEventInactive && (
+											<td className="px-6 py-4 text-right">
+												<div className="flex items-center justify-end gap-2">
+													{p.status !== "attended" && (
+														<button
+															onClick={() => handleStatusUpdate(p.event_id, p.email, "attended")}
+															className="px-3 py-1.5 bg-success-bg text-success-text hover:bg-success hover:text-background rounded-[2px] text-[11px] font-medium tracking-[0.05em] uppercase transition-colors cursor-pointer border-none">
+															Attended
+														</button>
+													)}
+													{p.status !== "cancelled" && (
+														<button
+															onClick={() => handleStatusUpdate(p.event_id, p.email, "cancelled")}
+															className="px-3 py-1.5 bg-danger-bg text-danger-text hover:bg-danger hover:text-background rounded-[2px] text-[11px] font-medium tracking-[0.05em] uppercase transition-colors cursor-pointer border-none">
+															Cancel
+														</button>
+													)}
+												</div>
+											</td>
+										)}
 									</tr>
 								))
 							)}

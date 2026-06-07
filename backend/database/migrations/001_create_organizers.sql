@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS organizers (
     role ENUM('admin', 'organizer') NOT NULL DEFAULT 'organizer',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     INDEX idx_email (email),
     INDEX idx_role (role)
 );

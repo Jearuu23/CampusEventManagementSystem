@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { UserRole } from "~/types/user";
+import { UserRole, type User } from "~/types/user";
 import { CheckAuth, LogoutUser } from "~/api/user";
 
 interface AuthContextType {
+	user: User | null;
+	setUser: (user: User | null) => void;
 	userRole: UserRole;
 	setUserRole: (role: UserRole) => void;
-	login: (role: UserRole) => void;
+	login: (user: User) => void;
 	logout: () => void;
 	loading: boolean;
 }
@@ -13,6 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+	const [user, setUser] = useState<User | null>(null);
 	const [userRole, setUserRole] = useState<UserRole>(UserRole.USER);
 	const [loading, setLoading] = useState(true);
 
@@ -22,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				const data = await CheckAuth();
 				if (data.success && data.user) {
 					setUserRole(data.user.role as UserRole);
+					setUser(data.user);
 				}
 			} catch (error) {
 				console.error("Failed to verify session:", error);
@@ -33,8 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		verifySession();
 	}, []);
 
-	const login = (role: UserRole) => {
-		setUserRole(role);
+	const login = (userData: User) => {
+		setUserRole(userData.role as UserRole);
+		setUser(userData);
 	};
 
 	const logout = async () => {
@@ -44,9 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			console.error("Logout failed:", error);
 		}
 		setUserRole(UserRole.USER);
+		setUser(null);
 	};
 
-	return <AuthContext.Provider value={{ userRole, setUserRole, login, logout, loading }}>{children}</AuthContext.Provider>;
+	return <AuthContext.Provider value={{ user, setUser, userRole, setUserRole, login, logout, loading }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

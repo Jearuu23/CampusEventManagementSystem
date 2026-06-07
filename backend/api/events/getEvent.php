@@ -12,7 +12,14 @@ if (!isset($_GET['id']) || empty(trim($_GET['id']))) {
 
 $id = intval($_GET['id']);
 
-$query = "SELECT * FROM events WHERE id = ?";
+$query = "
+	SELECT 
+		e.*, 
+		CONCAT(o.first_name, ' ', o.last_name) AS organizer_name,
+		o.organization AS department
+	FROM events e
+	LEFT JOIN organizers o ON e.organizer_id = o.id
+	WHERE e.id = ?";
 
 $stmt = $conn->prepare($query);
 if (!$stmt) {

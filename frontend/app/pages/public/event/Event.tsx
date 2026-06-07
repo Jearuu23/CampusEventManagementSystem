@@ -3,6 +3,7 @@ import { useLoaderData } from "react-router";
 import HeroSection from "./heroSection";
 import MainContent from "./mainContent";
 import type { Event as EventType } from "~/types/events";
+import { IMG_URL } from "~/api/constant";
 
 export default function Event() {
 	const { event } = useLoaderData() as { event: EventType };
@@ -35,10 +36,25 @@ export default function Event() {
 		};
 	}, []);
 
+	const getImageUrl = (path?: string) => {
+		if (!path) return "";
+		if (path.startsWith("http")) return path;
+		const filename = path.split(/[/\\]/).pop();
+		return `${IMG_URL}${filename}`;
+	};
+
 	return (
-		<div className="font-sans text-text-primary bg-background min-h-screen">
-			<HeroSection event={event} />
-			<MainContent event={event} />
+		<div className="font-sans text-text-primary bg-background min-h-screen relative">
+			{event?.image_path && (
+				<div className="absolute top-0 left-0 w-full h-[50vh] md:h-[70vh] z-0 overflow-hidden pointer-events-none">
+					<img src={getImageUrl(event.image_path)} alt={event.title} className="w-full h-full object-cover opacity-30" />
+					<div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+				</div>
+			)}
+			<div className="relative z-10">
+				<HeroSection event={event} />
+				<MainContent event={event} />
+			</div>
 		</div>
 	);
 }

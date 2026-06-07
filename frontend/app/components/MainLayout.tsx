@@ -2,6 +2,7 @@ import { Outlet } from "react-router";
 import Header from "./Header";
 import Footer from "./Footer";
 import Sidebar from "./Sidebar";
+import NotificationContainer from "./Notification";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { UserRole } from "~/types/user";
 
@@ -16,6 +17,7 @@ export default function MainLayout() {
 				<main className="flex-1 overflow-y-auto">
 					<Outlet />
 				</main>
+				<NotificationContainer />
 			</div>
 		);
 	}
@@ -25,6 +27,7 @@ export default function MainLayout() {
 			<Header />
 			<Outlet />
 			<Footer />
+			<NotificationContainer />
 		</>
 	);
 }

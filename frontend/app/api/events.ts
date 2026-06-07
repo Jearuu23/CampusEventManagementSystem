@@ -1,4 +1,5 @@
 import { API_URL } from "./constant";
+import type { RegisterEventPayload } from "~/types/events";
 
 export async function GetEvents(params?: { status?: string; organizer_id?: number; limit?: number; offset?: number; search?: string }) {
 	try {
@@ -70,6 +71,66 @@ export async function GetEventsByStatus(status: string) {
 	} catch (error) {
 		console.error("GetEventsByStatus Network Error:", error);
 		return { success: false, data: [] };
+	}
+}
+
+export async function CreateEvent(data: FormData) {
+	try {
+		const res = await fetch(`${API_URL}events/createEvent.php`, {
+			method: "POST",
+			credentials: "include",
+			body: data,
+		});
+		const text = await res.text();
+		try {
+			return JSON.parse(text);
+		} catch (e) {
+			console.error("CreateEvent JSON Parse Error. PHP Output:", text);
+			return { success: false, message: "Invalid JSON from server. Check console for details." };
+		}
+	} catch (error) {
+		console.error("CreateEvent Network Error:", error);
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function RegisterForEvent(data: RegisterEventPayload) {
+	try {
+		const res = await fetch(`${API_URL}events/registerEvent.php`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+		});
+		const text = await res.text();
+		try {
+			return JSON.parse(text);
+		} catch (e) {
+			console.error("RegisterForEvent JSON Parse Error. PHP Output:", text);
+			return { success: false, message: "Invalid JSON from server. Check console for details." };
+		}
+	} catch (error) {
+		console.error("RegisterForEvent Network Error:", error);
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function UpdateEventDetails(data: FormData) {
+	try {
+		const res = await fetch(`${API_URL}events/updateEvent.php`, {
+			method: "POST",
+			credentials: "include",
+			body: data,
+		});
+		const text = await res.text();
+		try {
+			return JSON.parse(text);
+		} catch (e) {
+			console.error("UpdateEventDetails JSON Parse Error. PHP Output:", text);
+			return { success: false, message: "Invalid JSON from server. Check console for details." };
+		}
+	} catch (error) {
+		console.error("UpdateEventDetails Network Error:", error);
+		return { success: false, message: "Network Error" };
 	}
 }
 
