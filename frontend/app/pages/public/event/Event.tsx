@@ -3,7 +3,7 @@ import { useLoaderData } from "react-router";
 import HeroSection from "./heroSection";
 import MainContent from "./mainContent";
 import type { Event as EventType } from "~/types/events";
-import { IMG_URL } from "~/api/constant";
+import { getImageUrl } from "~/utils/helpers";
 
 export default function Event() {
 	const { event } = useLoaderData() as { event: EventType };
@@ -35,13 +35,6 @@ export default function Event() {
 			}
 		};
 	}, []);
-
-	const getImageUrl = (path?: string) => {
-		if (!path) return "";
-		if (path.startsWith("http")) return path;
-		const filename = path.split(/[/\\]/).pop();
-		return `${IMG_URL}${filename}`;
-	};
 
 	return (
 		<div className="font-sans text-text-primary bg-background min-h-screen relative">

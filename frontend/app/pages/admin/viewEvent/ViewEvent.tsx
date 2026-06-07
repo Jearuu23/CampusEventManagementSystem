@@ -5,7 +5,7 @@ import { GetOrganizers } from "~/api/user";
 import EventHeader from "./eventHeader";
 import EventDetails from "./eventDetails";
 import { notify } from "~/components/Notification";
-import { IMG_URL } from "~/api/constant";
+import { getImageUrl } from "~/utils/helpers";
 
 export default function ViewEvent() {
 	const { id } = useParams();
@@ -109,13 +109,6 @@ export default function ViewEvent() {
 	if (!event) {
 		return <div className="p-12 font-mono text-[13px] text-brand">Event not found.</div>;
 	}
-
-	const getImageUrl = (path?: string) => {
-		if (!path) return "";
-		if (path.startsWith("http")) return path;
-		const filename = path.split(/[/\\]/).pop();
-		return `${IMG_URL}${filename}`;
-	};
 
 	return (
 		<div className="w-full bg-background min-h-screen p-8 md:p-12 fade-in-element">

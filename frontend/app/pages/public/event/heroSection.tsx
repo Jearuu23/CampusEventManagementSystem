@@ -1,18 +1,11 @@
 import React from "react";
 import type { Event } from "~/types/events";
-import { IMG_URL } from "~/api/constant";
+import { getImageUrl } from "~/utils/helpers";
 
 export default function HeroSection({ event }: { event?: Event }) {
 	const displayDate = event?.event_start_date
 		? new Date(event.event_start_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 		: "TBA";
-
-	const getImageUrl = (path?: string) => {
-		if (!path) return "";
-		if (path.startsWith("http")) return path;
-		const filename = path.split(/[/\\]/).pop();
-		return `${IMG_URL}${filename}`;
-	};
 
 	return (
 		<section className="bg-text-primary min-h-[50vh] flex flex-col justify-end px-8 md:px-20 pt-32 pb-16 relative overflow-hidden">

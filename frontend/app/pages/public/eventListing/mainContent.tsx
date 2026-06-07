@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLoaderData, useSearchParams } from "react-router";
 import { MapPinIcon, ClockIcon, UsersIcon } from "~/components/Icons";
-import { IMG_URL } from "~/api/constant";
+import { getImageUrl } from "~/utils/helpers";
 
 export default function MainContent({ viewMode }: { viewMode: "list" | "grid" }) {
 	const { events, total, page, limit } = useLoaderData() as { events: any[]; total: number; page: number; limit: number };
@@ -19,13 +19,6 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 		newParams.set("page", newPage.toString());
 		setSearchParams(newParams);
 		window.scrollTo({ top: 0, behavior: "smooth" });
-	};
-
-	const getImageUrl = (path?: string) => {
-		if (!path) return "";
-		if (path.startsWith("http")) return path;
-		const filename = path.split(/[/\\]/).pop();
-		return `${IMG_URL}${filename}`;
 	};
 
 	return (
