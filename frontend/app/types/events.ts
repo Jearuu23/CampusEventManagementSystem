@@ -2,71 +2,71 @@ export type Event = {
 	id: number;
 	title: string;
 	description: string;
-	event_start_date: string;
-	event_start_time: string;
-	event_end_date: string;
-	event_end_time: string;
+	eventStartDate: string;
+	eventStartTime: string;
+	eventEndDate: string;
+	eventEndTime: string;
 	location: string;
 	department: string;
-	organizer_id: number;
-	organizer_name?: string;
-	max_participants: number | null;
-	current_participants: number;
+	organizerId: number;
+	organizerName?: string;
+	maxParticipants: number | null;
+	currentParticipants: number;
 	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
-	image_path?: string;
-	created_at?: string;
-	updated_at?: string;
+	imagePath?: string;
+	createdAt?: string;
+	updatedAt?: string;
 };
 
 export type CreateEvent = {
 	title: string;
 	description: string;
-	event_start_date: string;
-	event_start_time: string;
-	event_end_date: string;
-	event_end_time: string;
+	eventStartDate: string;
+	eventStartTime: string;
+	eventEndDate: string;
+	eventEndTime: string;
 	location: string;
 	department: string;
-	organizer_id: number;
-	max_participants: number | null;
+	organizerId: number;
+	maxParticipants: number | null;
 	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
-	image_path?: string;
-	created_at?: string;
-	updated_at?: string;
+	imagePath?: string;
+	createdAt?: string;
+	updatedAt?: string;
 };
 
 export type UpdateEvent = {
 	id: number;
 	title: string;
 	description: string;
-	event_start_date: string;
-	event_start_time: string;
-	event_end_date: string;
-	event_end_time: string;
+	eventStartDate: string;
+	eventStartTime: string;
+	eventEndDate: string;
+	eventEndTime: string;
 	location: string;
 	department: string;
-	organizer_id: number;
-	max_participants: number | null;
+	organizerId: number;
+	maxParticipants: number | null;
 	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
-	image_path?: string;
-	created_at?: string;
-	updated_at?: string;
+	imagePath?: string;
+	createdAt?: string;
+	updatedAt?: string;
 };
 
 export interface Participant {
 	id?: number;
-	event_id: number;
-	event_title?: string;
-	user_id?: number;
+	eventId: number;
+	eventTitle?: string;
+	userId?: number;
 	name?: string;
 	email: string;
 	status: string;
 }
 
 export interface RegisterEventPayload {
-	event_id: number;
-	first_name: string;
-	last_name: string;
+	eventId: number;
+	firstName: string;
+	lastName: string;
 	email: string;
 	phone?: string;
 	organization?: string;

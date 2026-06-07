@@ -26,11 +26,11 @@ export default function OrganizerViewEvent() {
 	const fetchEvent = useCallback(async () => {
 		setLoading(true);
 		setError(null);
-		const [res, partsRes] = await Promise.all([GetEventById(Number(id)), GetParticipants({ event_id: Number(id) })]);
+		const [res, partsRes] = await Promise.all([GetEventById(Number(id)), GetParticipants({ eventId: Number(id) })]);
 
 		if (res.success && res.data) {
 			// Ensure the logged-in user is the organizer
-			if (res.data.organizer_id !== user?.id) {
+			if (res.data.organizerId !== user?.id) {
 				setError("Unauthorized: You can only view and edit your own events.");
 			} else {
 				setEvent(res.data);
@@ -59,12 +59,12 @@ export default function OrganizerViewEvent() {
 			setEditData({
 				title: event.title || "",
 				description: event.description || "",
-				event_start_date: event.event_start_date?.split(" ")[0] || "",
-				event_start_time: event.event_start_time || event.event_start_date?.split(" ")[1] || "00:00:00",
+				eventStartDate: event.eventStartDate?.split(" ")[0] || "",
+				eventStartTime: event.eventStartTime || event.eventStartDate?.split(" ")[1] || "00:00:00",
 				location: event.location || "",
-				max_participants: event.max_participants || "",
+				maxParticipants: event.maxParticipants || "",
 				status: event.status || "pending",
-				organizer_id: event.organizer_id || "",
+				organizerId: event.organizerId || "",
 			});
 		}
 	}, [event, isEditing]);
@@ -102,18 +102,18 @@ export default function OrganizerViewEvent() {
 		fd.append("title", editData.title);
 		fd.append("description", editData.description);
 		fd.append("location", editData.location);
-		if (editData.max_participants) fd.append("max_participants", editData.max_participants.toString());
+		if (editData.maxParticipants) fd.append("maxParticipants", editData.maxParticipants.toString());
 
 		// Organizers have restricted status options, but include it.
 		fd.append("status", editData.status);
 
-		fd.append("organizer_id", editData.organizer_id.toString());
+		fd.append("organizerId", editData.organizerId.toString());
 
-		fd.append("event_start_date", editData.event_start_date);
+		fd.append("eventStartDate", editData.eventStartDate);
 
-		let timeStr = editData.event_start_time || "00:00:00";
+		let timeStr = editData.eventStartTime || "00:00:00";
 		if (timeStr.split(":").length === 2) timeStr += ":00";
-		fd.append("event_start_time", timeStr);
+		fd.append("eventStartTime", timeStr);
 
 		const res = await UpdateEventDetails(fd);
 		if (res.success) {
@@ -146,9 +146,9 @@ export default function OrganizerViewEvent() {
 				&larr; Back
 			</button>
 			<div className="max-w-4xl">
-				{event.image_path && !isEditing && (
+				{event.imagePath && !isEditing && (
 					<div className="w-full h-[300px] md:h-[400px] mb-8 rounded-[4px] overflow-hidden bg-surface-secondary border border-border fade-in-element">
-						<img src={getImageUrl(event.image_path)} alt={event.title} className="w-full h-full object-cover" />
+						<img src={getImageUrl(event.imagePath)} alt={event.title} className="w-full h-full object-cover" />
 					</div>
 				)}
 				<EventHeader event={event} setEvent={setEvent} isEditing={isEditing} setIsEditing={setIsEditing} />
@@ -186,54 +186,52 @@ export default function OrganizerViewEvent() {
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Date</label>
 								<input
 									type="date"
-									name="event_start_date"
-									value={editData.event_start_date}
+									name="eventStartDate"
+									value={editData.eventStartDate}
 									onChange={handleEditChange}
 									required
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 								/>
-								{validationErrors.event_start_date && (
-									<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_date}</span>
+								{validationErrors.eventStartDate && (
+									<span className="text-brand text-[11px] mt-1">{validationErrors.eventStartDate}</span>
 								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Time</label>
 								<input
 									type="time"
-									name="event_start_time"
+									name="eventStartTime"
 									step="1"
-									value={editData.event_start_time}
+									value={editData.eventStartTime}
 									onChange={handleEditChange}
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 								/>
-								{validationErrors.event_start_time && (
-									<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_time}</span>
+								{validationErrors.eventStartTime && (
+									<span className="text-brand text-[11px] mt-1">{validationErrors.eventStartTime}</span>
 								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Max Participants (Optional)</label>
 								<input
 									type="number"
-									name="max_participants"
-									value={editData.max_participants}
+									name="maxParticipants"
+									value={editData.maxParticipants}
 									onChange={handleEditChange}
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
-								{validationErrors.max_participants && (
-									<span className="text-brand text-[11px] mt-1">{validationErrors.max_participants}</span>
+								{validationErrors.maxParticipants && (
+									<span className="text-brand text-[11px] mt-1">{validationErrors.maxParticipants}</span>
 								)}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Organizer</label>
 								<input
 									type="text"
-									value={event?.organizer_name || "Unknown"}
+									value={event?.organizerName || "Unknown"}
 									disabled
 									className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-muted outline-none cursor-not-allowed"
 								/>
-								{validationErrors.organizer_id && (
-									<span className="text-brand text-[11px] mt-1">{validationErrors.organizer_id}</span>
-								)}
+								{validationErrors.organizerId && <span className="text-brand text-[11px] mt-1">{validationErrors.organizerId}</span>}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Status</label>
@@ -260,8 +258,8 @@ export default function OrganizerViewEvent() {
 									onChange={(e) => setImageFile(e.target.files?.[0] || null)}
 									className="bg-background border border-border-strong px-3 py-2 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-[2px] file:border-0 file:text-[11px] file:font-mono file:uppercase file:tracking-wider file:bg-surface-secondary file:text-text-primary hover:file:bg-border cursor-pointer"
 								/>
-								{event?.image_path && !imageFile && (
-									<span className="text-[11px] text-text-muted truncate">Current: {event.image_path.split(/[/\\]/).pop()}</span>
+								{event?.imagePath && !imageFile && (
+									<span className="text-[11px] text-text-muted truncate">Current: {event.imagePath.split(/[/\\]/).pop()}</span>
 								)}
 							</div>
 						</div>

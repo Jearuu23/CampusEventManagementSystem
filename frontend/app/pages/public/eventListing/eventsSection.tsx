@@ -69,14 +69,14 @@ export default function EventsSection() {
 								<div className="flex flex-col gap-1.5 mt-auto pt-4 border-t border-border">
 									<div className="flex items-center gap-2 font-mono text-[11px] text-text-muted tracking-[0.04em]">
 										<CalendarIcon />
-										{event.event_start_date
-											? new Date(event.event_start_date).toLocaleDateString("en-US", {
+										{event.eventStartDate
+											? new Date(event.eventStartDate).toLocaleDateString("en-US", {
 													month: "short",
 													day: "numeric",
 													year: "numeric",
 												})
 											: "TBA"}{" "}
-										{event.event_start_time && ` · ${event.event_start_time}`}
+										{event.eventStartTime && ` · ${event.eventStartTime}`}
 									</div>
 									<div className="flex items-center gap-2 font-mono text-[11px] text-text-muted tracking-[0.04em]">
 										<MapPinIcon />

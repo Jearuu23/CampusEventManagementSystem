@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const login = (userData: User) => {
 		setUserRole(userData.role as UserRole);
 		setUser(userData);
+		console.log("User logged in:", userData);
 	};
 
 	const logout = async () => {

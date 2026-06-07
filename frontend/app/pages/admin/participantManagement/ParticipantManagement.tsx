@@ -55,7 +55,7 @@ export default function ParticipantManagement() {
 			if (selectedEventId !== "") {
 				const ev = events.find((e) => e.id === selectedEventId);
 				if (ev) {
-					setEventSearchTerm(`${ev.title} ${ev.event_start_date ? `(${new Date(ev.event_start_date).toLocaleDateString()})` : ""}`);
+					setEventSearchTerm(`${ev.title} ${ev.eventStartDate ? `(${new Date(ev.eventStartDate).toLocaleDateString()})` : ""}`);
 				}
 			} else {
 				setEventSearchTerm("");
@@ -71,7 +71,7 @@ export default function ParticipantManagement() {
 		setLoading(true);
 		setError(null);
 		const response = await GetParticipants({
-			event_id: selectedEventId as number,
+			eventId: selectedEventId as number,
 			status: statusFilter,
 			search: debouncedSearch,
 		});
@@ -87,8 +87,8 @@ export default function ParticipantManagement() {
 		fetchParticipants();
 	}, [selectedEventId, statusFilter, debouncedSearch]);
 
-	const handleStatusUpdate = async (event_id: number, email: string, status: string) => {
-		const response = await UpdateParticipantStatus({ event_id, email, status });
+	const handleStatusUpdate = async (eventId: number, email: string, status: string) => {
+		const response = await UpdateParticipantStatus({ eventId, email, status });
 		if (response.success) {
 			fetchParticipants();
 			notify(`Participant status updated to ${status}`, "success");
@@ -161,9 +161,9 @@ export default function ParticipantManagement() {
 														: "text-text-primary hover:bg-surface-secondary"
 												}`}>
 												{ev.title}
-												{ev.event_start_date && (
+												{ev.eventStartDate && (
 													<span className="text-text-muted ml-1 font-normal">
-														({new Date(ev.event_start_date).toLocaleDateString()})
+														({new Date(ev.eventStartDate).toLocaleDateString()})
 													</span>
 												)}
 											</div>
@@ -261,17 +261,15 @@ export default function ParticipantManagement() {
 								</tr>
 							) : (
 								sortedParticipants.map((p, idx) => (
-									<tr key={`${p.event_id}-${p.email}-${idx}`} className="hover:bg-white/5 transition-colors group">
+									<tr key={`${p.eventId}-${p.email}-${idx}`} className="hover:bg-white/5 transition-colors group">
 										<td className="px-6 py-4">
 											<div className="text-[14px] text-text-primary font-medium">{p.name || "N/A"}</div>
 											<div className="text-[13px] text-text-muted mt-0.5">{p.email}</div>
 										</td>
 										<td className="px-6 py-4">
-											<div className="text-[14px] text-text-primary line-clamp-1">
-												{p.event_title || `Event #${p.event_id}`}
-											</div>
+											<div className="text-[14px] text-text-primary line-clamp-1">{p.eventTitle || `Event #${p.eventId}`}</div>
 											<div className="font-mono text-[10px] text-text-muted mt-1 uppercase tracking-[0.05em]">
-												ID: {p.event_id}
+												ID: {p.eventId}
 											</div>
 										</td>
 										<td className="px-6 py-4">
@@ -293,14 +291,14 @@ export default function ParticipantManagement() {
 												<div className="flex items-center justify-end gap-2">
 													{p.status !== "attended" && (
 														<button
-															onClick={() => handleStatusUpdate(p.event_id, p.email, "attended")}
+															onClick={() => handleStatusUpdate(p.eventId, p.email, "attended")}
 															className="px-3 py-1.5 bg-success-bg text-success-text hover:bg-success hover:text-background rounded-[2px] text-[11px] font-medium tracking-[0.05em] uppercase transition-colors cursor-pointer border-none">
 															Attended
 														</button>
 													)}
 													{p.status !== "cancelled" && (
 														<button
-															onClick={() => handleStatusUpdate(p.event_id, p.email, "cancelled")}
+															onClick={() => handleStatusUpdate(p.eventId, p.email, "cancelled")}
 															className="px-3 py-1.5 bg-danger-bg text-danger-text hover:bg-danger hover:text-background rounded-[2px] text-[11px] font-medium tracking-[0.05em] uppercase transition-colors cursor-pointer border-none">
 															Cancel
 														</button>

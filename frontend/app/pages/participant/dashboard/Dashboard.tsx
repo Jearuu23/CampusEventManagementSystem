@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { notify } from "~/components/Notification";
 import { GetParticipantDashboard } from "~/api/user";
@@ -8,14 +8,12 @@ export default function Dashboard() {
 	const { user } = useAuth();
 	const [data, setData] = useState<ParticipantDashboardData | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [points, setPoints] = useState(0);
 
 	useEffect(() => {
 		async function fetchData() {
 			const res = await GetParticipantDashboard();
 			if (res.success && res.data) {
 				setData(res.data);
-				setPoints(res.data.points);
 			} else {
 				notify(res.message || "Failed to load dashboard data.", "error");
 			}
@@ -23,23 +21,6 @@ export default function Dashboard() {
 		}
 		fetchData();
 	}, []);
-
-	// Mock rewards catalog
-	const rewards = [
-		{ id: 101, title: "Certificate of Participation", cost: 500, type: "cert" },
-		{ id: 102, title: "$5 Campus Coffee Voucher", cost: 200, type: "voucher" },
-		{ id: 103, title: "Priority Event Registration", cost: 1000, type: "perk" },
-		{ id: 104, title: "University Merch Pack", cost: 2500, type: "merch" },
-	];
-
-	const handleRedeem = (reward: any) => {
-		if (points >= reward.cost) {
-			setPoints((prev) => prev - reward.cost);
-			notify(`Successfully redeemed: ${reward.title}!`, "success");
-		} else {
-			notify("Not enough points to redeem this reward.", "error");
-		}
-	};
 
 	if (loading) {
 		return <div className="p-12 font-mono text-[13px] text-text-muted">Loading dashboard...</div>;
@@ -53,15 +34,15 @@ export default function Dashboard() {
 						Participant Portal
 					</div>
 					<h1 className="font-serif text-[clamp(32px,3vw,48px)] font-bold mb-2">Welcome back, {user?.firstName || "Student"}</h1>
-					<p className="text-text-muted text-[14px] font-light">Track your event participation, earn points, and redeem campus rewards.</p>
+					<p className="text-text-muted text-[14px] font-light">Track your event participation, earn points, and view your certificates.</p>
 				</header>
 
 				{/* Points Overview */}
 				<section className="bg-surface-secondary border border-border p-8 rounded-[4px] mb-10 flex flex-col md:flex-row items-center justify-between gap-6">
 					<div>
-						<h2 className="font-mono text-[12px] uppercase tracking-wider text-text-muted mb-2">Available Balance</h2>
+						<h2 className="font-mono text-[12px] uppercase tracking-wider text-text-muted mb-2">Total Points Earned</h2>
 						<div className="font-serif text-[48px] font-bold text-brand leading-none">
-							{points} <span className="text-[20px] text-text-primary font-normal">pts</span>
+							{data?.points || 0} <span className="text-[20px] text-text-primary font-normal">pts</span>
 						</div>
 					</div>
 					<div className="flex gap-4">
@@ -101,26 +82,31 @@ export default function Dashboard() {
 						</div>
 					</section>
 
-					{/* Rewards Exchange */}
+					{/* Event Certificates */}
 					<section>
-						<h3 className="font-serif text-[24px] font-bold mb-6 border-b border-border pb-4">Rewards Exchange</h3>
+						<h3 className="font-serif text-[24px] font-bold mb-6 border-b border-border pb-4">Event Certificates</h3>
 						<div className="flex flex-col gap-4">
-							{rewards.map((reward) => (
-								<div
-									key={reward.id}
-									className="flex items-center justify-between p-4 bg-surface-secondary border border-border rounded-[2px] transition-colors hover:border-border-strong">
-									<div>
-										<div className="text-[13px] font-medium text-text-primary">{reward.title}</div>
-										<div className="font-mono text-[11px] text-brand mt-1">{reward.cost} pts required</div>
-									</div>
-									<button
-										onClick={() => handleRedeem(reward)}
-										disabled={points < reward.cost}
-										className="px-4 py-2 bg-background border border-brand text-brand font-mono text-[10px] uppercase tracking-wider rounded-[2px] hover:bg-brand hover:text-background transition-colors disabled:opacity-50 disabled:border-border disabled:text-text-muted disabled:hover:bg-background cursor-pointer">
-										Redeem
-									</button>
-								</div>
-							))}
+							{!data?.activities?.filter((act) => act.action === "attended" && act.points > 0)?.length ? (
+								<div className="text-[13px] text-text-muted">Attend events to earn certificates.</div>
+							) : (
+								data.activities
+									.filter((act) => act.action === "attended" && act.points > 0)
+									.map((act) => (
+										<div
+											key={`cert-${act.id}`}
+											className="flex items-center justify-between p-4 bg-surface-secondary border border-border rounded-[2px] transition-colors hover:border-border-strong">
+											<div>
+												<div className="text-[13px] font-medium text-text-primary">Certificate of Attendance</div>
+												<div className="font-mono text-[11px] text-brand mt-1">{act.event}</div>
+											</div>
+											<button
+												onClick={() => notify(`Downloaded certificate for ${act.event}`, "success")}
+												className="px-4 py-2 bg-background border border-brand text-brand font-mono text-[10px] uppercase tracking-wider rounded-[2px] hover:bg-brand hover:text-background transition-colors cursor-pointer">
+												Download
+											</button>
+										</div>
+									))
+							)}
 						</div>
 					</section>
 				</div>

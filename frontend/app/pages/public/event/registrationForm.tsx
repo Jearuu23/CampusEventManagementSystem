@@ -6,8 +6,8 @@ import { registrationFormSchema } from "~/schemas/schemas";
 
 export default function RegistrationForm({ event, user }: { event?: Event; user?: any }) {
 	const [formData, setFormData] = useState({
-		first_name: "",
-		last_name: "",
+		firstName: "",
+		lastName: "",
 		email: "",
 		password: "",
 		phone: "",
@@ -24,7 +24,7 @@ export default function RegistrationForm({ event, user }: { event?: Event; user?
 		const checkRegistration = async () => {
 			if (user && event) {
 				setIsChecking(true);
-				const res = await GetParticipants({ event_id: event.id, search: user.email });
+				const res = await GetParticipants({ eventId: event.id, search: user.email });
 				if (res.success && res.data) {
 					const participant = res.data.find((p: any) => p.email === user.email);
 					if (participant) {
@@ -40,7 +40,7 @@ export default function RegistrationForm({ event, user }: { event?: Event; user?
 
 	if (!event) return null;
 
-	const isFull = event.max_participants && (event.current_participants || 0) >= event.max_participants;
+	const isFull = event.maxParticipants && (event.currentParticipants || 0) >= event.maxParticipants;
 	const isClosed = event.status === "completed" || event.status === "cancelled" || event.status === "rejected";
 	const isDisabled = isFull || isClosed || isSubmitting;
 
@@ -75,16 +75,16 @@ export default function RegistrationForm({ event, user }: { event?: Event; user?
 		setIsSubmitting(true);
 		const payload = user
 			? {
-					event_id: event.id,
-					participant_id: user.id,
+					eventId: event.id,
+					participantId: user.id,
 					email: user.email,
 				}
-			: { event_id: event.id, ...formData };
+			: { eventId: event.id, ...formData };
 		const res = await RegisterForEvent(payload as any);
 
 		if (res.success) {
 			notify(res.message, "success");
-			setFormData({ first_name: "", last_name: "", email: "", password: "", phone: "", organization: "" });
+			setFormData({ firstName: "", lastName: "", email: "", password: "", phone: "", organization: "" });
 			if (user) {
 				setIsRegistered(true);
 				setRegistrationStatus("registered");
@@ -104,7 +104,7 @@ export default function RegistrationForm({ event, user }: { event?: Event; user?
 	const handleCancelRegistration = async () => {
 		if (!user || !event) return;
 		setIsSubmitting(true);
-		const res = await UpdateParticipantStatus({ event_id: event.id, email: user.email, status: "cancelled" });
+		const res = await UpdateParticipantStatus({ eventId: event.id, email: user.email, status: "cancelled" });
 		if (res.success) {
 			notify("Registration cancelled successfully.", "success");
 			setIsRegistered(true);
@@ -118,7 +118,7 @@ export default function RegistrationForm({ event, user }: { event?: Event; user?
 	const handleReRegister = async () => {
 		if (!user || !event) return;
 		setIsSubmitting(true);
-		const res = await UpdateParticipantStatus({ event_id: event.id, email: user.email, status: "registered" });
+		const res = await UpdateParticipantStatus({ eventId: event.id, email: user.email, status: "registered" });
 		if (res.success) {
 			notify("Successfully re-registered for the event.", "success");
 			setIsRegistered(true);
@@ -192,27 +192,27 @@ export default function RegistrationForm({ event, user }: { event?: Event; user?
 							<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">First Name *</label>
 							<input
 								type="text"
-								name="first_name"
-								value={formData.first_name}
+								name="firstName"
+								value={formData.firstName}
 								onChange={handleChange}
 								required
 								className="bg-transparent border-b border-border-strong pb-2 text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 								placeholder="Jane"
 							/>
-							{validationErrors.first_name && <span className="text-brand text-[11px] mt-1">{validationErrors.first_name}</span>}
+							{validationErrors.firstName && <span className="text-brand text-[11px] mt-1">{validationErrors.firstName}</span>}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Last Name *</label>
 							<input
 								type="text"
-								name="last_name"
-								value={formData.last_name}
+								name="lastName"
+								value={formData.lastName}
 								onChange={handleChange}
 								required
 								className="bg-transparent border-b border-border-strong pb-2 text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 								placeholder="Doe"
 							/>
-							{validationErrors.last_name && <span className="text-brand text-[11px] mt-1">{validationErrors.last_name}</span>}
+							{validationErrors.lastName && <span className="text-brand text-[11px] mt-1">{validationErrors.lastName}</span>}
 						</div>
 					</div>
 					<div className="flex flex-col gap-2">

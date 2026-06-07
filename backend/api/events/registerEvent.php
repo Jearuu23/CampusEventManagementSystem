@@ -10,18 +10,18 @@ if (empty($data)) {
 }
 
 $errors = [];
-if (!Validator::int($data['event_id'] ?? null)) {
-	$errors['event_id'] = "Valid Event ID is required.";
+if (!Validator::int($data['eventId'] ?? null)) {
+	$errors['eventId'] = "Valid Event ID is required.";
 }
 
-$is_logged_in_payload = isset($data['participant_id']) && isset($data['email']);
+$is_logged_in_payload = isset($data['participantId']) && isset($data['email']);
 
 if (!$is_logged_in_payload) {
-	if (!Validator::string($data['first_name'] ?? '')) {
-		$errors['first_name'] = "First name is required.";
+	if (!Validator::string($data['firstName'] ?? '')) {
+		$errors['firstName'] = "First name is required.";
 	}
-	if (!Validator::string($data['last_name'] ?? '')) {
-		$errors['last_name'] = "Last name is required.";
+	if (!Validator::string($data['lastName'] ?? '')) {
+		$errors['lastName'] = "Last name is required.";
 	}
 	if (!Validator::email($data['email'] ?? '')) {
 		$errors['email'] = "A valid email address is required.";
@@ -41,7 +41,7 @@ if (!empty($errors)) {
 	exit;
 }
 
-$event_id = intval($data["event_id"]);
+$event_id = intval($data["eventId"]);
 
 $checkEventStmt = $conn->prepare("SELECT id, title FROM events WHERE id = ?");
 $checkEventStmt->bind_param("i", $event_id);
@@ -64,7 +64,7 @@ $last_name = '';
 $email = '';
 
 if ($is_logged_in_payload) {
-	$participant_id = intval($data['participant_id']);
+	$participant_id = intval($data['participantId']);
 	$email = trim($data['email']);
 
 	$checkParticipantStmt = $conn->prepare("SELECT id, first_name, last_name, email FROM users WHERE id = ? AND email = ?");
@@ -84,8 +84,8 @@ if ($is_logged_in_payload) {
 	}
 	$checkParticipantStmt->close();
 } else {
-	$first_name = trim($data["first_name"]);
-	$last_name = trim($data["last_name"]);
+	$first_name = trim($data["firstName"]);
+	$last_name = trim($data["lastName"]);
 	$email = trim($data["email"]);
 	$password = password_hash($data["password"], PASSWORD_BCRYPT);
 	$phone = isset($data["phone"]) ? trim($data["phone"]) : null;
