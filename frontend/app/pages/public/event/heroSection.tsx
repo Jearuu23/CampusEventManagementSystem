@@ -29,7 +29,7 @@ export default function HeroSection({ event }: { event?: Event }) {
 					<span>{event?.location || "TBA"}</span>
 				</div>
 			</div>
-			<div className="absolute inset-0 bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] flex items-center justify-center -z-10">
+			<div className="absolute inset-0 bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] flex items-center justify-center z-0">
 				{event?.image_path ? (
 					<img src={getImageUrl(event.image_path)} alt={event?.title} className="w-full h-full object-cover opacity-30" />
 				) : (
