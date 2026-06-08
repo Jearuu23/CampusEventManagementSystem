@@ -47,13 +47,13 @@ $email = null;
 $status = null;
 
 if ($isGet) {
-	$event_id = isset($_GET['event_id']) ? intval($_GET['event_id']) : null;
+	$event_id = isset($_GET['eventId']) ? intval($_GET['eventId']) : null;
 	$email = isset($_GET['email']) ? trim($_GET['email']) : null;
 	$status = isset($_GET['status']) ? trim($_GET['status']) : null;
 } else {
 	$data = json_decode(file_get_contents("php://input"), true);
 	if ($data) {
-		$event_id = isset($data['event_id']) ? intval($data['event_id']) : null;
+		$event_id = isset($data['eventId']) ? intval($data['eventId']) : null;
 		$email = isset($data['email']) ? trim($data['email']) : null;
 		$status = isset($data['status']) ? trim($data['status']) : null;
 	}
@@ -61,7 +61,7 @@ if ($isGet) {
 
 $errors = [];
 if (!Validator::int($event_id ?? null)) {
-	$errors['event_id'] = "Valid Event ID is required.";
+	$errors['eventId'] = "Valid Event ID is required.";
 }
 if (!Validator::email($email ?? '')) {
 	$errors['email'] = "A valid email address is required.";
@@ -100,10 +100,16 @@ $participantRow = $participantResult->fetch_assoc();
 $participant_id = $participantRow['id'];
 $participantStmt->close();
 
-// Update participation status
-$updateStmt = $conn->prepare("UPDATE event_registrations SET status = ? WHERE event_id = ? AND participant_id = ?");
+// Assign points based on status
+$points = 0;
+if ($status === 'registered')
+	$points = 10;
+else if ($status === 'attended')
+	$points = 50;
 
-$updateStmt->bind_param("sii", $status, $event_id, $participant_id);
+// Update participation status
+$updateStmt = $conn->prepare("UPDATE event_registrations SET status = ?, points = ? WHERE event_id = ? AND participant_id = ?");
+$updateStmt->bind_param("siii", $status, $points, $event_id, $participant_id);
 
 if ($updateStmt->execute() && $updateStmt->affected_rows > 0) {
 	sendResponse(true, "Your participation status has been successfully updated to <strong>" . htmlspecialchars($status) . "</strong>.", $isGet);

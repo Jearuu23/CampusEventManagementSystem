@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "cemsdb";
+$database = "activo";
 
 $conn = new mysqli($servername, $username, $password);
 
@@ -26,15 +26,15 @@ foreach ($files as $file) {
 	$sql = file_get_contents($file);
 
 	if ($conn->multi_query($sql)) {
-		echo "Executed: $file\n";
+		echo "<br/>Executed: $file";
 		while ($conn->more_results() && $conn->next_result()) {
 		}
 	} else {
-		echo "Error in $file: " . $conn->error . "\n";
+		echo "<br/>Error in $file: " . $conn->error;
 	}
 }
 
-echo "Migration complete \nSeeding start";
+echo "<br/>Migration complete <br/><br/>Seeding start";
 
 $files = glob("seeds/*.sql");
 
@@ -42,11 +42,11 @@ foreach ($files as $file) {
 	$sql = file_get_contents($file);
 
 	if ($conn->multi_query($sql)) {
-		echo "Executed: $file\n";
+		echo "<br/>Executed: $file\n";
 		while ($conn->more_results() && $conn->next_result()) {
 		}
 	} else {
-		echo "Error in $file: " . $conn->error . "\n";
+		echo "<br/>Error in $file: " . $conn->error;
 	}
 }
 

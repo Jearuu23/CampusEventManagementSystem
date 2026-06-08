@@ -1,11 +1,11 @@
 import { API_URL } from "./constant";
 import type { RegisterEventPayload } from "~/types/events";
 
-export async function GetEvents(params?: { status?: string; organizer_id?: number; limit?: number; offset?: number; search?: string }) {
+export async function GetEvents(params?: { status?: string; organizerId?: number; limit?: number; offset?: number; search?: string }) {
 	try {
 		const query = new URLSearchParams();
 		if (params?.status) query.append("status", params.status);
-		if (params?.organizer_id) query.append("organizer_id", params.organizer_id.toString());
+		if (params?.organizerId) query.append("organizerId", params.organizerId.toString());
 		if (params?.limit) query.append("limit", params.limit.toString());
 		if (params?.offset !== undefined) query.append("offset", params.offset.toString());
 		if (params?.search) query.append("search", params.search);
@@ -34,7 +34,7 @@ export async function GetEvents(params?: { status?: string; organizer_id?: numbe
 
 export async function GetEventById(id: number) {
 	try {
-		const res = await fetch(`${API_URL}events/getEvent.php?id=${id}`, {
+		const res = await fetch(`${API_URL}events/getEvent.php?eventId=${id}&withRewards=true`, {
 			method: "GET",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -42,7 +42,7 @@ export async function GetEventById(id: number) {
 		const text = await res.text();
 		try {
 			const data = JSON.parse(text);
-			return { ...data, data: data.event || null };
+			return { ...data, data: data.data || data.event || null };
 		} catch (e) {
 			console.error("GetEventById JSON Parse Error. PHP Output:", text);
 			return { success: false, data: null };
@@ -162,10 +162,10 @@ export async function DeleteEvent(id: number) {
 	}
 }
 
-export async function GetParticipants(params?: { event_id?: number; status?: string; search?: string }) {
+export async function GetParticipants(params?: { eventId?: number; status?: string; search?: string }) {
 	try {
 		const query = new URLSearchParams();
-		if (params?.event_id) query.append("event_id", params.event_id.toString());
+		if (params?.eventId) query.append("eventId", params.eventId.toString());
 		if (params?.status) query.append("status", params.status);
 		if (params?.search) query.append("search", params.search);
 
@@ -191,7 +191,7 @@ export async function GetParticipants(params?: { event_id?: number; status?: str
 	}
 }
 
-export async function UpdateParticipantStatus(data: { event_id: number; email: string; status: string }) {
+export async function UpdateParticipantStatus(data: { eventId: number; email: string; status: string }) {
 	try {
 		const res = await fetch(`${API_URL}events/updateParticipation.php`, {
 			method: "POST",
@@ -208,6 +208,69 @@ export async function UpdateParticipantStatus(data: { event_id: number; email: s
 		}
 	} catch (error) {
 		console.error("UpdateParticipantStatus Network Error:", error);
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function AddEventReward(data: { eventId: number; name: string; points: number }) {
+	try {
+		const res = await fetch(`${API_URL}events/addReward.php`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ event_id: data.eventId, name: data.name, points: data.points }),
+		});
+		const text = await res.text();
+		try {
+			return JSON.parse(text);
+		} catch (e) {
+			console.error("AddEventReward JSON Parse Error:", text);
+			return { success: false, message: "Invalid JSON from server." };
+		}
+	} catch (error) {
+		console.error("AddEventReward Network Error:", error);
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function VerifyRewardCode(data: { code: string; eventId?: number }) {
+	try {
+		const res = await fetch(`${API_URL}events/verifyRewardCode.php`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ code: data.code, event_id: data.eventId }),
+		});
+		const text = await res.text();
+		try {
+			return JSON.parse(text);
+		} catch (e) {
+			console.error("VerifyRewardCode JSON Parse Error:", text);
+			return { success: false, message: "Invalid JSON from server." };
+		}
+	} catch (error) {
+		console.error("VerifyRewardCode Network Error:", error);
+		return { success: false, message: "Network Error" };
+	}
+}
+
+export async function RedeemReward(data: { eventId: number; email: string; rewardId: number }) {
+	try {
+		const res = await fetch(`${API_URL}events/redeemReward.php`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ event_id: data.eventId, email: data.email, reward_id: data.rewardId }),
+		});
+		const text = await res.text();
+		try {
+			return JSON.parse(text);
+		} catch (e) {
+			console.error("RedeemReward JSON Parse Error:", text);
+			return { success: false, message: "Invalid JSON from server." };
+		}
+	} catch (error) {
+		console.error("RedeemReward Network Error:", error);
 		return { success: false, message: "Network Error" };
 	}
 }

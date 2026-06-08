@@ -15,9 +15,9 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 		title: "",
 		description: "",
 		location: "",
-		event_start_date: "",
-		event_start_time: "",
-		max_participants: "",
+		eventStartDate: "",
+		eventStartTime: "",
+		maxParticipants: "",
 	});
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,32 +54,28 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 			fd.append("title", formData.title);
 			fd.append("description", formData.description);
 			fd.append("location", formData.location);
-			if (formData.max_participants) {
-				fd.append("max_participants", formData.max_participants);
+			if (formData.maxParticipants) {
+				fd.append("maxParticipants", formData.maxParticipants);
 			}
 
 			// Defaults for new events
 			fd.append("status", "pending");
 			if (user?.id) {
-				fd.append("organizer_id", user.id.toString());
+				fd.append("organizerId", user.id.toString());
 			}
 
 			if (imageFile) {
 				fd.append("image", imageFile);
 			}
 
-			let dateToPass = formData.event_start_date;
-			if (dateToPass && !dateToPass.includes(" ")) {
-				let timeStr = formData.event_start_time || "00:00:00";
-				if (timeStr.split(":").length === 2) timeStr += ":00";
-				dateToPass += ` ${timeStr}`;
+			if (formData.eventStartDate) {
+				fd.append("eventStartDate", formData.eventStartDate);
 			}
-			fd.append("event_date", dateToPass);
 
-			if (formData.event_start_time) {
-				let timeStr = formData.event_start_time;
+			if (formData.eventStartTime) {
+				let timeStr = formData.eventStartTime;
 				if (timeStr.split(":").length === 2) timeStr += ":00";
-				fd.append("event_time", timeStr);
+				fd.append("eventStartTime", timeStr);
 			}
 
 			const res = await CreateEvent(fd);
@@ -88,9 +84,9 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 					title: "",
 					description: "",
 					location: "",
-					event_start_date: "",
-					event_start_time: "",
-					max_participants: "",
+					eventStartDate: "",
+					eventStartTime: "",
+					maxParticipants: "",
 				});
 				setImageFile(null);
 				onSuccess();
@@ -163,40 +159,40 @@ export default function ModalCreateEvent({ isOpen, onClose, onSuccess }: ModalCr
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Date *</label>
 							<input
 								type="date"
-								name="event_start_date"
-								value={formData.event_start_date}
+								name="eventStartDate"
+								value={formData.eventStartDate}
 								onChange={handleChange}
 								required
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 							/>
-							{validationErrors.event_start_date && (
-								<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_date}</span>
+							{validationErrors.eventStartDate && (
+								<span className="text-brand text-[11px] mt-1">{validationErrors.eventStartDate}</span>
 							)}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Time</label>
 							<input
 								type="time"
-								name="event_start_time"
-								value={formData.event_start_time}
+								name="eventStartTime"
+								value={formData.eventStartTime}
 								onChange={handleChange}
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors [color-scheme:dark]"
 							/>
-							{validationErrors.event_start_time && (
-								<span className="text-brand text-[11px] mt-1">{validationErrors.event_start_time}</span>
+							{validationErrors.eventStartTime && (
+								<span className="text-brand text-[11px] mt-1">{validationErrors.eventStartTime}</span>
 							)}
 						</div>
 						<div className="flex flex-col gap-2">
 							<label className="font-mono text-[10px] uppercase text-text-muted tracking-wider">Max Participants (Optional)</label>
 							<input
 								type="number"
-								name="max_participants"
-								value={formData.max_participants}
+								name="maxParticipants"
+								value={formData.maxParticipants}
 								onChange={handleChange}
 								className="bg-background border border-border-strong px-3 py-2.5 rounded-[2px] text-[13px] text-text-primary outline-none focus:border-brand transition-colors"
 							/>
-							{validationErrors.max_participants && (
-								<span className="text-brand text-[11px] mt-1">{validationErrors.max_participants}</span>
+							{validationErrors.maxParticipants && (
+								<span className="text-brand text-[11px] mt-1">{validationErrors.maxParticipants}</span>
 							)}
 						</div>
 						<div className="flex flex-col gap-2">

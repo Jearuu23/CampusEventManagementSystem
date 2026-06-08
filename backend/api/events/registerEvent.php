@@ -14,9 +14,9 @@ if (!Validator::int($data['eventId'] ?? null)) {
 	$errors['eventId'] = "Valid Event ID is required.";
 }
 
-$is_logged_in_payload = isset($data['participantId']) && isset($data['email']);
+$isLoggedInPayload = isset($data['participantId']) && isset($data['email']);
 
-if (!$is_logged_in_payload) {
+if (!$isLoggedInPayload) {
 	if (!Validator::string($data['firstName'] ?? '')) {
 		$errors['firstName'] = "First name is required.";
 	}
@@ -41,10 +41,10 @@ if (!empty($errors)) {
 	exit;
 }
 
-$event_id = intval($data["eventId"]);
+$eventId = intval($data["eventId"]);
 
 $checkEventStmt = $conn->prepare("SELECT id, title FROM events WHERE id = ?");
-$checkEventStmt->bind_param("i", $event_id);
+$checkEventStmt->bind_param("i", $eventId);
 $checkEventStmt->execute();
 $eventResult = $checkEventStmt->get_result();
 
@@ -58,24 +58,24 @@ $eventRow = $eventResult->fetch_assoc();
 $eventTitle = $eventRow['title'];
 $checkEventStmt->close();
 
-$participant_id = null;
-$first_name = '';
-$last_name = '';
+$participantId = null;
+$firstName = '';
+$lastName = '';
 $email = '';
 
-if ($is_logged_in_payload) {
-	$participant_id = intval($data['participantId']);
+if ($isLoggedInPayload) {
+	$participantId = intval($data['participantId']);
 	$email = trim($data['email']);
 
 	$checkParticipantStmt = $conn->prepare("SELECT id, first_name, last_name, email FROM users WHERE id = ? AND email = ?");
-	$checkParticipantStmt->bind_param("is", $participant_id, $email);
+	$checkParticipantStmt->bind_param("is", $participantId, $email);
 	$checkParticipantStmt->execute();
 	$participantResult = $checkParticipantStmt->get_result();
 
 	if ($participantResult->num_rows > 0) {
 		$row = $participantResult->fetch_assoc();
-		$first_name = $row['first_name'];
-		$last_name = $row['last_name'];
+		$firstName = $row['first_name'];
+		$lastName = $row['last_name'];
 	} else {
 		echo json_encode(["success" => false, "message" => "Invalid participant details provided"]);
 		$checkParticipantStmt->close();
@@ -84,8 +84,8 @@ if ($is_logged_in_payload) {
 	}
 	$checkParticipantStmt->close();
 } else {
-	$first_name = trim($data["firstName"]);
-	$last_name = trim($data["lastName"]);
+	$firstName = trim($data["firstName"]);
+	$lastName = trim($data["lastName"]);
 	$email = trim($data["email"]);
 	$password = password_hash($data["password"], PASSWORD_BCRYPT);
 	$phone = isset($data["phone"]) ? trim($data["phone"]) : null;
@@ -99,17 +99,17 @@ if ($is_logged_in_payload) {
 	if ($participantResult->num_rows > 0) {
 		// Participant exists, get their ID and optionally update their details
 		$row = $participantResult->fetch_assoc();
-		$participant_id = $row['id'];
+		$participantId = $row['id'];
 		$updateParticipantStmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, password = ?, phone = ?, organization = ? WHERE id = ?");
-		$updateParticipantStmt->bind_param("sssssi", $first_name, $last_name, $password, $phone, $organization, $participant_id);
+		$updateParticipantStmt->bind_param("sssssi", $firstName, $lastName, $password, $phone, $organization, $participantId);
 		$updateParticipantStmt->execute();
 		$updateParticipantStmt->close();
 	} else {
 		// Participant does not exist, create a new one
 		$insertParticipantStmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, password, phone, organization, role, status) VALUES (?, ?, ?, ?, ?, ?, 'participant', 'approved')");
-		$insertParticipantStmt->bind_param("ssssss", $first_name, $last_name, $email, $password, $phone, $organization);
+		$insertParticipantStmt->bind_param("ssssss", $firstName, $lastName, $email, $password, $phone, $organization);
 		if ($insertParticipantStmt->execute()) {
-			$participant_id = $insertParticipantStmt->insert_id;
+			$participantId = $insertParticipantStmt->insert_id;
 		} else {
 			echo json_encode(["success" => false, "message" => "Failed to create participant: " . $conn->error]);
 			$insertParticipantStmt->close();
@@ -122,20 +122,20 @@ if ($is_logged_in_payload) {
 }
 
 $registerStmt = $conn->prepare("INSERT INTO event_registrations (event_id, participant_id, status) VALUES (?, ?, 'registered')");
-$registerStmt->bind_param("ii", $event_id, $participant_id);
+$registerStmt->bind_param("ii", $eventId, $participantId);
 
 if ($registerStmt->execute()) {
 	$updateEventCountStmt = $conn->prepare("UPDATE events SET current_participants = current_participants + 1 WHERE id = ?");
-	$updateEventCountStmt->bind_param("i", $event_id);
+	$updateEventCountStmt->bind_param("i", $eventId);
 	$updateEventCountStmt->execute();
 	$updateEventCountStmt->close();
 
 	$domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : "localhost";
 	$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-	$cancelLink = "$protocol://$domain/CEMS/backend/api/events/updateParticipation.php?event_id=$event_id&email=" . urlencode($email) . "&status=cancelled";
+	$cancelLink = "$protocol://$domain/CEMS/backend/api/events/updateParticipation.php?eventId=$eventId&email=" . urlencode($email) . "&status=cancelled";
 
 	$subject = "Event Registration Confirmation: " . $eventTitle;
-	$message = "Hello $first_name $last_name,\n\nYou have successfully registered for the event: '$eventTitle'.\n\nIf you need to cancel your registration, please click the link below:\n$cancelLink\n\nThank you!";
+	$message = "Hello $firstName $lastName,\n\nYou have successfully registered for the event: '$eventTitle'.\n\nIf you need to cancel your registration, please click the link below:\n$cancelLink\n\nThank you!";
 	$headers = "From: noreply@university.edu\r\n";
 	$headers .= "Reply-To: noreply@university.edu\r\n";
 	$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";

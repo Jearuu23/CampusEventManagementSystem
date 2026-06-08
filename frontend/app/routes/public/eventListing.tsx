@@ -1,6 +1,7 @@
 import type { Route } from "../+types/eventListing";
 import { default as EventListingPage } from "~/pages/public/eventListing/EventListing";
 import { GetEvents } from "~/api/events";
+import { APPNAME } from "~/constants";
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -13,7 +14,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export function meta({}: Route.MetaArgs) {
-	return [{ title: "Event Listing" }, { name: "description", content: "Welcome to React Router!" }];
+	return [{ title: `Events | ${APPNAME}` }, { name: "description", content: "Welcome to React Router!" }];
 }
 
 export default function EventListing() {

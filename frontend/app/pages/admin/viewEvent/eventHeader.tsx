@@ -48,7 +48,7 @@ export default function EventHeader({
 				</span>
 				<span className="font-mono text-[12px] text-text-muted flex items-center gap-2">
 					<span className="w-1 h-1 rounded-full bg-border"></span>
-					{event.event_start_date ? new Date(event.event_start_date).toLocaleString() : "Date TBA"}
+					{event.eventStartDate ? new Date(event.eventStartDate).toLocaleString() : "Date TBA"}
 				</span>
 			</div>
 

@@ -22,8 +22,8 @@ export type LoginCredentials = {
 };
 
 export type RegisterCredentials = {
-	first_name: string;
-	last_name: string;
+	firstName: string;
+	lastName: string;
 	email: string;
 	password: string;
 	organization?: string;
@@ -36,8 +36,8 @@ export interface ParticipationRecord {
 
 export type Participant = {
 	id?: number;
-	first_name: string;
-	last_name: string;
+	firstName: string;
+	lastName: string;
 	email: string;
 	password?: string;
 	phone?: string;

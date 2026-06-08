@@ -4,22 +4,23 @@ include "../../database/db.php";
 include_once "../../logging/logging.php";
 require_once "../../helpers/validation.php";
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+	session_start();
+}
 
 try {
 
 	$raw_input = file_get_contents("php://input");
-	Logger::log("Register API called. Raw input: " . $raw_input);
 
 	$data = json_decode($raw_input, true);
 
 	$errors = [];
 
-	if (!Validator::string($data['first_name'] ?? '')) {
-		$errors['first_name'] = "First name is required.";
+	if (!Validator::string($data['firstName'] ?? '')) {
+		$errors['firstName'] = "First name is required.";
 	}
-	if (!Validator::string($data['last_name'] ?? '')) {
-		$errors['last_name'] = "Last name is required.";
+	if (!Validator::string($data['lastName'] ?? '')) {
+		$errors['lastName'] = "Last name is required.";
 	}
 	if (!Validator::string($data['organization'] ?? '')) {
 		$errors['organization'] = "Organization is required.";
@@ -41,8 +42,8 @@ try {
 		exit;
 	}
 
-	$first_name = trim($data["first_name"]);
-	$last_name = trim($data["last_name"]);
+	$first_name = trim($data["firstName"]);
+	$last_name = trim($data["lastName"]);
 	$email = trim($data["email"]);
 	$password = password_hash($data["password"], PASSWORD_BCRYPT);
 	$organization = $data["organization"] ?? null;

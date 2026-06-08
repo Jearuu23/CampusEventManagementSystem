@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { GetEventById } from "~/api/events";
+import { GetEventById, RedeemReward } from "~/api/events";
 import { GetParticipationStatus, UpdateParticipationStatus } from "~/api/user";
 import { useAuth } from "~/contexts/auth/AuthContext";
 import { notify } from "~/components/Notification";
@@ -19,6 +19,7 @@ export default function ParticipantViewEvent() {
 	const [registrationStatus, setRegistrationStatus] = useState<string | null>(null);
 	const [points, setPoints] = useState<number>(0);
 	const [isUpdating, setIsUpdating] = useState(false);
+	const [redeemedCode, setRedeemedCode] = useState<string | null>(null);
 
 	const fetchData = useCallback(async () => {
 		setLoading(true);
@@ -59,7 +60,7 @@ export default function ParticipantViewEvent() {
 		setIsUpdating(true);
 		try {
 			const res = await UpdateParticipationStatus({
-				event_id: Number(id),
+				eventId: Number(id),
 				email: user.email,
 				status: newStatus,
 			});
@@ -68,6 +69,7 @@ export default function ParticipantViewEvent() {
 				setRegistrationStatus(newStatus);
 				if (newStatus === "cancelled") setPoints(0);
 				if (newStatus === "registered") setPoints(10);
+				if (newStatus === "attended") setPoints(50);
 				notify(res.message || `Successfully updated status to ${newStatus}.`, "success");
 			} else {
 				notify(res.message || "Failed to update participation status.", "error");
@@ -78,6 +80,60 @@ export default function ParticipantViewEvent() {
 		} finally {
 			setIsUpdating(false);
 		}
+	};
+
+	const handleRedeem = async (cost: number, rewardName: string, rewardId: number) => {
+		if (points >= cost) {
+			if (!user?.email) return;
+
+			const res = await RedeemReward({
+				eventId: Number(id),
+				email: user.email,
+				rewardId,
+			});
+
+			if (res.success) {
+				setPoints(points - cost);
+				setRedeemedCode(res.data?.code || Math.random().toString(36).substring(2, 8).toUpperCase());
+				notify(`Successfully redeemed ${rewardName}! Show this code to the organizer.`, "success");
+			} else {
+				notify(res.message || "Failed to redeem reward.", "error");
+			}
+		} else {
+			notify("Not enough points to redeem this reward.", "error");
+		}
+	};
+
+	const handleDownloadCertificate = () => {
+		const printWindow = window.open("", "", "width=800,height=600");
+		if (!printWindow) return;
+		printWindow.document.write(`
+			<html>
+			<head>
+				<title>Certificate - ${event.title}</title>
+				<style>
+					body { font-family: 'Georgia', serif; text-align: center; padding: 40px; background: #f9f9f9; margin: 0; }
+					.cert { border: 8px solid #c8401e; padding: 60px 40px; background: white; outline: 2px solid #a8873a; outline-offset: -16px; }
+					h1 { font-size: 48px; color: #c8401e; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+					h2 { font-size: 36px; margin: 20px 0; color: #111; }
+					p { font-size: 18px; color: #555; margin: 10px 0; font-style: italic; }
+					.event { font-weight: bold; font-size: 26px; margin: 30px 0; color: #222; font-style: normal; }
+				</style>
+			</head>
+			<body>
+				<div class="cert">
+					<h1>Certificate of Attendance</h1>
+					<p>This is to proudly certify that</p>
+					<h2>${user?.firstName} ${user?.lastName}</h2>
+					<p>has successfully participated in</p>
+					<div class="event">${event.title}</div>
+					<p>Awarded on ${new Date().toLocaleDateString()}</p>
+				</div>
+				<script>window.print();</script>
+			</body>
+			</html>
+		`);
+		printWindow.document.close();
 	};
 
 	if (loading) {
@@ -94,6 +150,8 @@ export default function ParticipantViewEvent() {
 
 	const isEventActive = !["completed", "cancelled"].includes(event.status);
 
+	const rewardsList = event.rewards;
+
 	return (
 		<div className="w-full bg-background min-h-[calc(100vh-56px)] p-8 md:p-12 fade-in-element text-text-primary">
 			<div className="max-w-5xl mx-auto">
@@ -103,9 +161,9 @@ export default function ParticipantViewEvent() {
 					&larr; Back to Dashboard
 				</button>
 
-				{event.image_path && (
+				{event.imagePath && (
 					<div className="w-full h-[300px] md:h-[400px] mb-8 rounded-[4px] overflow-hidden bg-surface-secondary border border-border fade-in-element">
-						<img src={getImageUrl(event.image_path)} alt={event.title} className="w-full h-full object-cover" />
+						<img src={getImageUrl(event.imagePath)} alt={event.title} className="w-full h-full object-cover" />
 					</div>
 				)}
 
@@ -121,13 +179,13 @@ export default function ParticipantViewEvent() {
 								<span className="text-brand">
 									<CalendarIcon />
 								</span>
-								{event.event_start_date?.split(" ")[0]}
+								{event.eventStartDate?.split(" ")[0]}
 							</div>
 							<div className="flex items-center gap-2.5">
 								<span className="text-brand">
 									<ClockIcon />
 								</span>
-								{event.event_start_time}
+								{event.eventStartTime}
 							</div>
 							{event.location && (
 								<div className="flex items-center gap-2.5">
@@ -172,6 +230,38 @@ export default function ParticipantViewEvent() {
 								{points || 0} <span className="text-[14px] text-text-muted font-normal">pts</span>
 							</span>
 						</div>
+
+						<div className="mb-8 pb-4 border-b border-border">
+							<h4 className="font-serif text-[20px] font-bold mb-4">Rewards</h4>
+							<div className="flex flex-col gap-3">
+								{rewardsList.map((reward: any, index: number) => (
+									<div key={index} className="flex justify-between items-center">
+										<span className="text-[13px] font-medium text-text-primary">{reward.name}</span>
+										<button
+											onClick={() => handleRedeem(reward.points, reward.name, reward.id)}
+											disabled={points < reward.points}
+											className="px-3 py-1.5 bg-brand text-background font-mono text-[10px] uppercase tracking-wider rounded-[2px] cursor-pointer hover:bg-brand-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-none">
+											{reward.points} pts
+										</button>
+									</div>
+								))}
+							</div>
+
+							{redeemedCode && (
+								<div className="mt-5 p-4 bg-success-bg border border-success/20 rounded-[2px] text-center fade-in-element">
+									<div className="font-mono text-[10px] uppercase text-success-text tracking-wider mb-2">Your Redemption Code</div>
+									<div className="font-mono text-[20px] font-bold text-success-text tracking-[0.2em]">{redeemedCode}</div>
+								</div>
+							)}
+						</div>
+
+						{registrationStatus === "attended" && (
+							<button
+								onClick={handleDownloadCertificate}
+								className="w-full mb-4 py-3.5 bg-[#16a34a] text-white font-mono text-[11px] uppercase tracking-wider hover:bg-[#15803d] transition-colors cursor-pointer">
+								Download Certificate
+							</button>
+						)}
 
 						{isEventActive ? (
 							registrationStatus === "cancelled" ? (

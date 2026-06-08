@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function ValuesSection() {
 	return (
 		<section className="bg-text-primary py-[100px] px-8 md:px-20 grid grid-cols-1 md:grid-cols-[1fr_1.8fr] gap-12 md:gap-20 items-start">

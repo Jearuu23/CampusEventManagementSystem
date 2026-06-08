@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1); // Expose errors to frontend console instead of returning a silent 500
+ini_set('display_errors', 1);
 
 include_once "../core/header.php";
 include "../../database/db.php";
@@ -11,14 +11,14 @@ header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-	$event_id = isset($_GET['event_id']) ? intval($_GET['event_id']) : null;
+	$event_id = isset($_GET['eventId']) ? intval($_GET['eventId']) : null;
 	$status = isset($_GET['status']) ? trim($_GET['status']) : null;
 	$search = isset($_GET['search']) ? trim($_GET['search']) : null;
 
 	$query = "SELECT 
-				er.event_id, 
-				e.title as event_title, 
-				er.participant_id, 
+				er.event_id as eventId, 
+				e.title as eventTitle, 
+				er.participant_id as participantId, 
 				CONCAT(u.first_name, ' ', u.last_name) as name, 
 				u.email, 
 				er.status 

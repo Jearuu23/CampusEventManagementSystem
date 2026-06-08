@@ -20,7 +20,7 @@ export default function EventManagement() {
 		if (!user?.id) return;
 		setLoading(true);
 		try {
-			const res = await GetEvents({ organizer_id: user.id });
+			const res = await GetEvents({ organizerId: user.id });
 			if (res.success && res.data) {
 				setEvents(res.data);
 			}
@@ -46,8 +46,8 @@ export default function EventManagement() {
 		let bValue = b[sortField as keyof typeof b] || "";
 
 		if (sortField === "date") {
-			aValue = a.event_start_date ? new Date(a.event_start_date).getTime() : 0;
-			bValue = b.event_start_date ? new Date(b.event_start_date).getTime() : 0;
+			aValue = a.eventStartDate ? new Date(a.eventStartDate).getTime() : 0;
+			bValue = b.eventStartDate ? new Date(b.eventStartDate).getTime() : 0;
 		}
 
 		if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
@@ -142,10 +142,10 @@ export default function EventManagement() {
 									<tr key={event.id} className="border-b border-border last:border-0 hover:bg-white/5 transition-colors group">
 										<td className="p-4 text-[14px] text-text-primary font-medium">{event.title}</td>
 										<td className="p-4 text-[13px] text-text-muted">
-											{event.event_start_date ? new Date(event.event_start_date).toLocaleDateString() : "TBA"}
+											{event.eventStartDate ? new Date(event.eventStartDate).toLocaleDateString() : "TBA"}
 										</td>
 										<td className="p-4 text-[13px] text-text-muted">
-											{event.current_participants || 0} {event.max_participants ? `/ ${event.max_participants}` : ""}
+											{event.currentParticipants || 0} {event.maxParticipants ? `/ ${event.maxParticipants}` : ""}
 										</td>
 										<td className="p-4">
 											<span

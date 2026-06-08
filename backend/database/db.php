@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "cemsdb";
+$database = "activo";
 
 $conn = new mysqli($servername, $username, $password, $database);
 

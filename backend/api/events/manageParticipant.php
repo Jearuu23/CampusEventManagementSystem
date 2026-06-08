@@ -18,16 +18,16 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'PUT') {
 	$data = json_decode(file_get_contents("php://input"), true);
-	$event_id = $data['event_id'] ?? null;
-	$participant_id = $data['participant_id'] ?? null;
+	$event_id = $data['eventId'] ?? null;
+	$participant_id = $data['participantId'] ?? null;
 	$status = $data['status'] ?? null;
 
 	$errors = [];
 	if (!Validator::int($event_id)) {
-		$errors['event_id'] = "Valid Event ID is required.";
+		$errors['eventId'] = "Valid Event ID is required.";
 	}
 	if (!Validator::int($participant_id)) {
-		$errors['participant_id'] = "Valid Participant ID is required.";
+		$errors['participantId'] = "Valid Participant ID is required.";
 	}
 	if (!Validator::string($status)) {
 		$errors['status'] = "Status is required.";
@@ -37,8 +37,14 @@ if ($method === 'PUT') {
 		exit;
 	}
 
-	$stmt = $conn->prepare("UPDATE event_registrations SET status = ? WHERE event_id = ? AND participant_id = ?");
-	$stmt->bind_param("sii", $status, $event_id, $participant_id);
+	$points = 0;
+	if ($status === 'registered')
+		$points = 10;
+	else if ($status === 'attended')
+		$points = 50;
+
+	$stmt = $conn->prepare("UPDATE event_registrations SET status = ?, points = ? WHERE event_id = ? AND participant_id = ?");
+	$stmt->bind_param("siii", $status, $points, $event_id, $participant_id);
 	echo json_encode(["success" => $stmt->execute(), "message" => "Participant status updated"]);
 	$stmt->close();
 }

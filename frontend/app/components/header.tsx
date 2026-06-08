@@ -48,7 +48,7 @@ export default function Header() {
 	return (
 		<nav className="bg-sidebar border-b border-white/10 sticky top-0 z-[100] flex items-center justify-between px-6 md:px-12 h-14">
 			<NavLink to={routeLinks.home} className="font-serif font-bold text-[18px] text-background tracking-[0.02em] no-underline shrink-0">
-				Campus<span className="text-brand">Events</span>
+				ACTI<span className="text-brand">VO</span>
 			</NavLink>
 
 			<ul className="hidden lg:flex items-center gap-8 list-none m-0 p-0">

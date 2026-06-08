@@ -3,12 +3,12 @@ include_once "../core/header.php";
 include "../../database/db.php";
 require_once "../../helpers/validation.php";
 
-$event_id = isset($_GET['event_id']) ? intval($_GET['event_id']) : null;
+$event_id = isset($_GET['eventId']) ? intval($_GET['eventId']) : null;
 $email = isset($_GET['email']) ? trim($_GET['email']) : null;
 
 $errors = [];
 if (!Validator::int($event_id)) {
-	$errors['event_id'] = "Valid Event ID is required.";
+	$errors['eventId'] = "Valid Event ID is required.";
 }
 if (!Validator::email($email)) {
 	$errors['email'] = "A valid email is required.";

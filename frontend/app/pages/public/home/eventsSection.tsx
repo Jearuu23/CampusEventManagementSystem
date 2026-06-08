@@ -14,6 +14,7 @@ export default function EventsSection() {
 				const response = (await GetEvents({ status: "ongoing,approved", limit: 3 })) as any;
 				if (response.success && response.data) {
 					setEvents(response.data.slice(0, 3));
+					console.log("events:", response.data.slice(0, 3));
 				}
 			} catch (error) {
 				console.error("Failed to load events:", error);
@@ -59,9 +60,9 @@ export default function EventsSection() {
 								<div className="overflow-hidden rounded-[1px]">
 									<div
 										className={`w-full ${isFeatured ? "aspect-video" : "aspect-[4/3]"} bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] relative flex items-center justify-center overflow-hidden`}>
-										{event.image_path ? (
+										{event.imagePath ? (
 											<img
-												src={getImageUrl(event.image_path)}
+												src={getImageUrl(event.imagePath)}
 												alt={event.title}
 												className="w-full h-full object-cover opacity-80"
 											/>
@@ -99,14 +100,14 @@ export default function EventsSection() {
 								<div className="flex flex-col gap-1.5 mt-auto pt-4 border-t border-border">
 									<div className="flex items-center gap-2 font-mono text-[11px] text-text-muted tracking-[0.04em]">
 										<CalendarIcon />
-										{event.event_start_date
-											? new Date(event.event_start_date).toLocaleDateString("en-US", {
+										{event.eventStartDate
+											? new Date(event.eventStartDate).toLocaleDateString("en-US", {
 													month: "short",
 													day: "numeric",
 													year: "numeric",
 												})
 											: "TBA"}{" "}
-										{event.event_start_time && ` · ${event.event_start_time}`}
+										{event.eventStartTime && ` · ${event.eventStartTime}`}
 									</div>
 									<div className="flex items-center gap-2 font-mono text-[11px] text-text-muted tracking-[0.04em]">
 										<MapPinIcon />

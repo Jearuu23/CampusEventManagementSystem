@@ -59,8 +59,8 @@ export default function EventsTab() {
 		let bValue = b[sortField as keyof typeof b] || "";
 
 		if (sortField === "date") {
-			aValue = a.event_start_date ? new Date(a.event_start_date).getTime() : 0;
-			bValue = b.event_start_date ? new Date(b.event_start_date).getTime() : 0;
+			aValue = a.eventStartDate ? new Date(a.eventStartDate).getTime() : 0;
+			bValue = b.eventStartDate ? new Date(b.eventStartDate).getTime() : 0;
 		}
 
 		if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
@@ -130,7 +130,7 @@ export default function EventsTab() {
 									<td className="p-4 text-[14px] font-medium text-text-primary">{event.title}</td>
 									<td className="p-4 text-[13px] text-text-muted">{event.department || "Unknown"}</td>
 									<td className="p-4 text-[13px] text-text-muted">
-										{event.event_start_date ? event.event_start_date.split(" ")[0] : "TBA"}
+										{event.eventStartDate ? event.eventStartDate.split(" ")[0] : "TBA"}
 									</td>
 									<td className="p-4 text-sm">
 										<span

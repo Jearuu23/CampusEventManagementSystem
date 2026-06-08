@@ -4,11 +4,11 @@ include "../../database/db.php";
 require_once "../../helpers/validation.php";
 
 $status = isset($_GET["status"]) ? trim($_GET["status"]) : null;
-$organizer_id = isset($_GET["organizer_id"]) ? intval($_GET["organizer_id"]) : null;
+$organizer_id = isset($_GET["organizerId"]) ? intval($_GET["organizerId"]) : null;
 $limit = isset($_GET["limit"]) ? intval($_GET["limit"]) : null;
 
 $errors = [];
-if (isset($_GET['organizer_id']) && !Validator::int($_GET['organizer_id'])) {
+if (isset($_GET['organizerId']) && !Validator::int($_GET['organizerId'])) {
 	$errors['organizer_id'] = "Organizer ID must be a valid integer.";
 }
 if (isset($_GET['limit']) && !Validator::int($_GET['limit'])) {
@@ -63,14 +63,11 @@ $countQuery = "SELECT COUNT(*) as total FROM events" . $whereSql;
 $countStmt = $conn->prepare($countQuery);
 if ($countStmt) {
 	if (!empty($types)) {
-		$c_bind_names = [];
-		$c_bind_names[] = $types;
-		for ($i = 0; $i < count($params); $i++) {
-			$c_bind_name = "c_param" . $i;
-			$$c_bind_name = $params[$i];
-			$c_bind_names[] = &$$c_bind_name;
+		$count_bind_params = [];
+		foreach ($params as $key => $value) {
+			$count_bind_params[$key] = &$params[$key];
 		}
-		call_user_func_array([$countStmt, "bind_param"], $c_bind_names);
+		$countStmt->bind_param($types, ...$count_bind_params);
 	}
 	$countStmt->execute();
 	$countResult = $countStmt->get_result();
@@ -85,19 +82,19 @@ $query = "SELECT
          id,
          title,
          description,
-         event_start_date,
-         event_start_time,
-         event_end_date,
-         event_end_time,
+         event_start_date AS eventStartDate,
+         event_start_time AS eventStartTime,
+         event_end_date AS eventEndDate,
+         event_end_time AS eventEndTime,
          location,
-         organizer_id,
-         max_participants,
-         current_participants,
+         organizer_id AS organizerId,
+         max_participants AS maxParticipants,
+         current_participants AS currentParticipants,
          status,
-         image_path,
+         image_path AS imagePath,
          department,
-         created_at,
-         updated_at
+         created_at AS createdAt,
+         updated_at AS updatedAt
      FROM events" . $whereSql . " ORDER BY event_start_date ASC, event_start_time ASC";
 
 $offset = isset($_GET["offset"]) ? intval($_GET["offset"]) : null;
@@ -124,13 +121,11 @@ if (!$stmt) {
 }
 
 if (!empty($types)) {
-	$bind_names[] = $types;
-	for ($i = 0; $i < count($params); $i++) {
-		$bind_name = "param" . $i;
-		$$bind_name = $params[$i];
-		$bind_names[] = &$$bind_name;
+	$bind_params = [];
+	foreach ($params as $key => $value) {
+		$bind_params[$key] = &$params[$key];
 	}
-	call_user_func_array([$stmt, "bind_param"], $bind_names);
+	$stmt->bind_param($types, ...$bind_params);
 }
 
 $stmt->execute();

@@ -84,7 +84,7 @@ export default function Sidebar() {
 		<aside className="w-64 bg-sidebar border-r border-white/10 flex flex-col h-full sticky top-0 shrink-0">
 			<div className="h-14 flex items-center px-6 border-b border-white/10 shrink-0">
 				<NavLink to={routeLinks.home} className="font-serif font-bold text-[18px] text-background tracking-[0.02em] no-underline">
-					Campus<span className="text-brand">Events</span>
+					ACTI<span className="text-brand">VO</span>
 				</NavLink>
 			</div>
 

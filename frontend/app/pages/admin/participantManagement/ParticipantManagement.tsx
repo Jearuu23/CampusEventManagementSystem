@@ -64,14 +64,10 @@ export default function ParticipantManagement() {
 	}, [isEventDropdownOpen, selectedEventId, events]);
 
 	const fetchParticipants = async () => {
-		if (selectedEventId === "") {
-			setParticipants([]);
-			return;
-		}
 		setLoading(true);
 		setError(null);
 		const response = await GetParticipants({
-			eventId: selectedEventId as number,
+			eventId: selectedEventId === "" ? undefined : (selectedEventId as number),
 			status: statusFilter,
 			search: debouncedSearch,
 		});
@@ -115,11 +111,11 @@ export default function ParticipantManagement() {
 			{/* Filters & Search */}
 			<div className="flex flex-col sm:flex-row gap-4 mb-6 bg-surface-secondary p-5 rounded-[4px] border border-border">
 				<div className="flex-1 flex flex-col gap-2" ref={eventDropdownRef}>
-					<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Select Event</label>
+					<label className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">Filter by Event</label>
 					<div className="relative">
 						<input
 							type="text"
-							placeholder="Search and select an event..."
+							placeholder="All Events"
 							value={eventSearchTerm}
 							onChange={(e) => {
 								setEventSearchTerm(e.target.value);
@@ -217,10 +213,8 @@ export default function ParticipantManagement() {
 
 			{error && <div className="bg-danger-bg text-danger-text px-4 py-3 rounded-[2px] text-[13px] font-medium mb-6">{error}</div>}
 
-			{selectedEventId !== "" && !loading && (
-				<div className="font-mono text-[11px] text-text-muted tracking-[0.08em] mb-4 uppercase">
-					Total participants: {participants.length}
-				</div>
+			{!loading && (
+				<div className="font-mono text-[11px] text-text-muted tracking-[0.08em] mb-4 uppercase">Total records: {participants.length}</div>
 			)}
 
 			<div className="bg-surface-secondary border border-border rounded-[4px] overflow-hidden">
@@ -232,6 +226,7 @@ export default function ParticipantManagement() {
 									Participant
 								</th>
 								<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium">Event</th>
+								<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium">Points</th>
 								<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium">Status</th>
 								{!isEventInactive && (
 									<th className="px-6 py-4 font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted font-medium text-right">
@@ -241,21 +236,15 @@ export default function ParticipantManagement() {
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-border">
-							{selectedEventId === "" ? (
+							{loading ? (
 								<tr>
-									<td colSpan={isEventInactive ? 3 : 4} className="px-6 py-12 text-center text-[13px] text-text-muted font-medium">
-										Please select an event from the dropdown to view its participants.
-									</td>
-								</tr>
-							) : loading ? (
-								<tr>
-									<td colSpan={isEventInactive ? 3 : 4} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
+									<td colSpan={isEventInactive ? 4 : 5} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
 										Loading participants...
 									</td>
 								</tr>
 							) : participants.length === 0 ? (
 								<tr>
-									<td colSpan={isEventInactive ? 3 : 4} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
+									<td colSpan={isEventInactive ? 4 : 5} className="px-6 py-8 text-center text-[13px] text-text-muted font-medium">
 										No participants found matching your criteria.
 									</td>
 								</tr>
@@ -270,6 +259,11 @@ export default function ParticipantManagement() {
 											<div className="text-[14px] text-text-primary line-clamp-1">{p.eventTitle || `Event #${p.eventId}`}</div>
 											<div className="font-mono text-[10px] text-text-muted mt-1 uppercase tracking-[0.05em]">
 												ID: {p.eventId}
+											</div>
+										</td>
+										<td className="px-6 py-4">
+											<div className="font-mono text-[13px] text-brand font-medium">
+												{p.points !== undefined ? p.points : 0} pts
 											</div>
 										</td>
 										<td className="px-6 py-4">

@@ -13,7 +13,11 @@ if (isset($_SESSION["user_id"]) && isset($_SESSION["role"])) {
 		"user" => [
 			"id" => $_SESSION["user_id"],
 			"role" => $_SESSION["role"],
-			"email" => $_SESSION["email"] ?? ""
+			"email" => $_SESSION["email"] ?? "",
+			"firstName" => $_SESSION["firstName"] ?? "",
+			"lastName" => $_SESSION["lastName"] ?? "",
+			"organization" => $_SESSION["organization"] ?? null,
+			"status" => $_SESSION["status"] ?? ""
 		]
 	]);
 } else {

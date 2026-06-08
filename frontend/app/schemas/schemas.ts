@@ -6,8 +6,8 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-	first_name: z.string().min(1, "First Name is required"),
-	last_name: z.string().min(1, "Last Name is required"),
+	firstName: z.string().min(1, "First Name is required"),
+	lastName: z.string().min(1, "Last Name is required"),
 	organization: z.string().min(1, "Organization is required"),
 	email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
 	password: z.string().min(6, "Password must be at least 6 characters"),
@@ -17,13 +17,13 @@ export const createEventSchema = z.object({
 	title: z.string().min(1, "Title is required"),
 	description: z.string().optional(),
 	location: z.string().optional(),
-	event_start_date: z.string().min(1, "Date is required"),
-	event_start_time: z.string().optional(),
-	max_participants: z.union([z.string(), z.number()]).optional(),
+	eventStartDate: z.string().min(1, "Date is required"),
+	eventStartTime: z.string().optional(),
+	maxParticipants: z.union([z.string(), z.number()]).optional(),
 });
 
 export const updateEventSchema = createEventSchema.extend({
-	organizer_id: z.union([z.string(), z.number()]).optional(),
+	organizerId: z.union([z.string(), z.number()]).optional(),
 	status: z.string().optional(),
 });
 
@@ -35,8 +35,8 @@ export const manageOrganizerSchema = z.object({
 });
 
 export const registrationFormSchema = z.object({
-	first_name: z.string().min(1, "First Name is required"),
-	last_name: z.string().min(1, "Last Name is required"),
+	firstName: z.string().min(1, "First Name is required"),
+	lastName: z.string().min(1, "Last Name is required"),
 	email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
 	password: z.string().min(6, "Password must be at least 6 characters"),
 	phone: z.string().optional(),

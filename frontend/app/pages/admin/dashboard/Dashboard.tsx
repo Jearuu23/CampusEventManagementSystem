@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
 
 				if (eventsRes.success && eventsRes.data) {
 					totalEvents = eventsRes.total || eventsRes.data.length;
-					totalParticipants = eventsRes.data.reduce((sum: number, event: any) => sum + (Number(event.current_participants) || 0), 0);
+					totalParticipants = eventsRes.data.reduce((sum: number, event: any) => sum + (Number(event.currentParticipants) || 0), 0);
 				}
 
 				setStatsData({
@@ -118,7 +118,7 @@ export default function AdminDashboardPage() {
 											{event.title || `Event #${event.id}`}
 										</div>
 										<div className="text-[12px] text-text-muted mt-1">
-											{event.event_start_date ? new Date(event.event_start_date).toLocaleDateString() : "Date TBA"}
+											{event.eventStartDate ? new Date(event.eventStartDate).toLocaleDateString() : "Date TBA"}
 										</div>
 									</div>
 									<span className="px-2.5 py-1 bg-warning-bg text-warning-text rounded-[2px] font-mono text-[9px] tracking-[0.1em] uppercase">

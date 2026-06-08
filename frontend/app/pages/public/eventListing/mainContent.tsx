@@ -52,15 +52,15 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 						<p className="text-[14px] text-background/55 leading-[1.65] font-light mb-7 max-w-[480px]">{featuredEvent.description}</p>
 						<div className="flex flex-wrap gap-6">
 							<div className="flex items-center gap-2 font-mono text-[11px] text-background/45 tracking-[0.04em]">
-								<ClockIcon />{" "}
-								{featuredEvent.event_start_date
-									? new Date(featuredEvent.event_start_date).toLocaleDateString("en-US", {
+								<ClockIcon />
+								{featuredEvent.eventStartDate
+									? new Date(featuredEvent.eventStartDate).toLocaleDateString("en-US", {
 											month: "short",
 											day: "numeric",
 											year: "numeric",
 										})
-									: "TBA"}{" "}
-								· {featuredEvent.event_start_time || "TBA"}
+									: "TBA"}
+								· {featuredEvent.eventStartTime || "TBA"}
 							</div>
 							<div className="flex items-center gap-2 font-mono text-[11px] text-background/45 tracking-[0.04em]">
 								<MapPinIcon /> {featuredEvent.location}
@@ -71,9 +71,9 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 						</div>
 					</div>
 					<div className="bg-gradient-to-br from-[#1a1a0f] via-[#2d2a18] to-[#1a1208] relative flex items-center justify-center overflow-hidden min-h-[160px] md:min-h-full">
-						{featuredEvent.image_path ? (
+						{featuredEvent.imagePath ? (
 							<img
-								src={getImageUrl(featuredEvent.image_path)}
+								src={getImageUrl(featuredEvent.imagePath)}
 								alt={featuredEvent.title}
 								className="w-full h-full object-cover opacity-60"
 							/>
@@ -96,7 +96,7 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 						<div className="flex flex-col gap-[1px] bg-border border border-border">
 							{displayEvents.length > 0 ? (
 								displayEvents.map((event, i) => {
-									const d = new Date(event.event_start_date || Date.now());
+									const d = new Date(event.eventStartDate || Date.now());
 									const day = isNaN(d.getDate()) ? "--" : d.getDate().toString();
 									const month = isNaN(d.getMonth()) ? "---" : d.toLocaleString("default", { month: "short" });
 									return (
@@ -107,10 +107,10 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 											month={month}
 											tag={event.department || "Event"}
 											title={event.title}
-											time={event.event_start_time || "TBA"}
+											time={event.eventStartTime || "TBA"}
 											loc={event.location || "TBA"}
 											aud="Open to All"
-											cap={event.max_participants ? `${event.max_participants} seats` : "No limit"}
+											cap={event.maxParticipants ? `${event.maxParticipants} seats` : "No limit"}
 											status={
 												event.status === "approved"
 													? "Open"
@@ -157,7 +157,7 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 									key={event.id || i}
 									id={event.id}
 									bg={bgs[i % bgs.length]}
-									imagePath={getImageUrl(event.image_path)}
+									imagePath={getImageUrl(event.imagePath)}
 									svg={
 										<svg width="60" height="60" viewBox="0 0 80 80" fill="none" opacity="0.25">
 											<circle cx="40" cy="40" r="30" stroke="#a8873a" strokeWidth="1" />
@@ -168,7 +168,7 @@ export default function MainContent({ viewMode }: { viewMode: "list" | "grid" })
 									tag={event.department || "Event"}
 									title={event.title}
 									desc={event.description}
-									time={`${event.event_start_date ? new Date(event.event_start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBA"} · ${event.event_start_time || "TBA"}`}
+									time={`${event.eventStartDate ? new Date(event.eventStartDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "TBA"} · ${event.eventStartTime || "TBA"}`}
 									loc={event.location || "TBA"}
 								/>
 							);

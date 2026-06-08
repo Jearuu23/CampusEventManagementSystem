@@ -13,16 +13,16 @@ if (!isset($_SESSION["user_id"])) {
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (empty($data["id"]) || empty($data["organizer_id"])) {
+if (empty($data["id"]) || empty($data["organizerId"])) {
 	echo json_encode([
 		"success" => false,
-		"message" => "Missing required fields: id, organizer_id"
+		"message" => "Missing required fields: id, organizerId"
 	]);
 	exit;
 }
 
 $id = intval($data["id"]);
-$organizer_id = intval($data["organizer_id"]);
+$organizer_id = intval($data["organizerId"]);
 
 if ($_SESSION["role"] !== "admin" && $_SESSION["user_id"] !== $organizer_id) {
 	echo json_encode([

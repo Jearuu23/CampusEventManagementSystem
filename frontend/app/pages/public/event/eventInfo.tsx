@@ -19,10 +19,10 @@ export default function EventInfo({ event }: { event?: Event }) {
 		return `${displayHours}:${minutes} ${ampm}`;
 	};
 
-	const startDate = formatDate(event.event_start_date) || "TBA";
-	const endDate = formatDate(event.event_end_date);
-	const startTime = formatTime(event.event_start_time) || "TBA";
-	const endTime = formatTime(event.event_end_time);
+	const startDate = formatDate(event.eventStartDate) || "TBA";
+	const endDate = formatDate(event.eventEndDate);
+	const startTime = formatTime(event.eventStartTime) || "TBA";
+	const endTime = formatTime(event.eventEndTime);
 
 	const displayDate = endDate && startDate !== endDate ? `${startDate} - ${endDate}` : startDate;
 	const displayTime = endTime ? `${startTime} – ${endTime}` : startTime;
@@ -49,7 +49,7 @@ export default function EventInfo({ event }: { event?: Event }) {
 				<div>
 					<div className="font-mono text-[10px] tracking-[0.15em] uppercase text-text-muted mb-1.5">Capacity</div>
 					<div className="text-[14px] text-text-primary flex items-center gap-2">
-						{event.current_participants || 0} / {event.max_participants ? `${event.max_participants} Registered` : "No Limit"}
+						{event.currentParticipants || 0} / {event.maxParticipants ? `${event.maxParticipants} Registered` : "No Limit"}
 					</div>
 					<div
 						className={`mt-2 font-mono text-[9px] tracking-[0.1em] uppercase py-1 px-2.5 rounded-[1px] inline-block ${
@@ -68,7 +68,7 @@ export default function EventInfo({ event }: { event?: Event }) {
 				</div>
 				<div>
 					<div className="font-mono text-[10px] tracking-[0.15em] uppercase text-text-muted mb-1.5">Organizer</div>
-					<div className="text-[14px] text-text-primary">{event.organizer_name || "Event Organizer"}</div>
+					<div className="text-[14px] text-text-primary">{event.organizerName || "Event Organizer"}</div>
 				</div>
 			</div>
 		</div>

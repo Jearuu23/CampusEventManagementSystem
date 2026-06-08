@@ -13,8 +13,8 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 $errors = [];
-if (!Validator::int($_GET['event_id'] ?? null)) {
-	$errors['event_id'] = "Valid Event ID is required.";
+if (!Validator::int($_GET['eventId'] ?? null)) {
+	$errors['eventId'] = "Valid Event ID is required.";
 }
 
 if (!empty($errors)) {
@@ -26,7 +26,7 @@ if (!empty($errors)) {
 	exit;
 }
 
-$event_id = intval($_GET['event_id']);
+$event_id = intval($_GET['eventId']);
 $user_id = $_SESSION["user_id"];
 $user_role = $_SESSION["role"];
 
@@ -61,13 +61,13 @@ if ($user_role !== "admin") {
 $query = "
     SELECT 
         p.id, 
-        p.first_name, 
-        p.last_name, 
+        p.first_name AS firstName, 
+        p.last_name AS lastName, 
         p.email, 
         p.phone, 
         p.organization, 
         er.status, 
-        er.registered_at,
+        er.registered_at AS registeredAt,
         er.points
     FROM event_registrations er
     JOIN users p ON er.participant_id = p.id

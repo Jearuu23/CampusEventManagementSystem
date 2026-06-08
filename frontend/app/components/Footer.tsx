@@ -6,7 +6,7 @@ export default function Footer() {
 			<div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-12 pb-12 border-b border-white/10 mb-8">
 				<div>
 					<div className="font-serif text-[22px] font-bold text-background mb-3">
-						Campus<span className="text-brand">Events</span>
+						ACTI<span className="text-brand">VO</span>
 					</div>
 					<p className="text-[13px] font-light text-background/40 leading-[1.6] max-w-[240px]">
 						The intellectual and cultural heartbeat of our university campus, since 1891.
@@ -29,7 +29,7 @@ export default function Footer() {
 						</li>
 						<li>
 							<Link
-								to="/eventListing"
+								to="/event-listing"
 								className="text-[13px] font-light text-background/50 no-underline transition-colors hover:text-background">
 								Event Listings
 							</Link>

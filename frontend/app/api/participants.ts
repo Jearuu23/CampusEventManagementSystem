@@ -3,7 +3,7 @@ import type { Participant } from "~/types/user";
 
 export async function GetEventParticipants(eventId: number) {
 	try {
-		const res = await fetch(`${API_URL}events/getEventParticipants.php?event_id=${eventId}`, {
+		const res = await fetch(`${API_URL}events/getEventParticipants.php?eventId=${eventId}`, {
 			method: "GET",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -20,7 +20,7 @@ export async function UpdateParticipantStatus(eventId: number, participantId: nu
 			method: "PUT",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
-			body: JSON.stringify({ event_id: eventId, participant_id: participantId, status }),
+			body: JSON.stringify({ eventId: eventId, participantId: participantId, status }),
 		});
 		return await res.json();
 	} catch (error) {

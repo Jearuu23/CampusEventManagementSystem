@@ -22,34 +22,34 @@ export default function Dashboard() {
 
 		const fetchStats = async () => {
 			try {
-				const eventsRes = await GetEvents({ organizer_id: user.id });
+				const eventsRes = await GetEvents({ organizerId: user.id });
 
 				let totalParticipants = 0;
 				let totalEvents = 0;
 				let upcomingEventsCount = 0;
 				let pendingApprovalsCount = 0;
 
-				if (eventsRes.success && eventsRes.data) {
-					totalEvents = eventsRes.total || eventsRes.data.length;
+				if (eventsRes.success && eventsRes.events) {
+					totalEvents = eventsRes.total || eventsRes.events.length;
 					const now = new Date();
 					// Resetting time to midnight for today's comparison
 					now.setHours(0, 0, 0, 0);
 
-					eventsRes.data.forEach((event: Event) => {
-						totalParticipants += Number(event.current_participants) || 0;
+					eventsRes.events.forEach((event: Event) => {
+						totalParticipants += Number(event.currentParticipants) || 0;
 						if (event.status === "pending") {
 							pendingApprovalsCount++;
 						}
 
-						if (event.event_start_date) {
-							const eventDate = new Date(event.event_start_date);
+						if (event.eventStartDate) {
+							const eventDate = new Date(event.eventStartDate);
 							if (eventDate >= now && ["approved", "ongoing"].includes(event.status)) {
 								upcomingEventsCount++;
 							}
 						}
 					});
 
-					setRecentEvents([...eventsRes.data].reverse().slice(0, 5));
+					setRecentEvents([...eventsRes.events].reverse().slice(0, 5));
 				}
 
 				setStatsData({
@@ -132,14 +132,14 @@ export default function Dashboard() {
 											{event.title || `Event #${event.id}`}
 										</div>
 										<div className="text-[12px] text-text-muted mt-1">
-											{event.event_start_date ? new Date(event.event_start_date).toLocaleDateString() : "Date TBA"}
+											{event.eventStartDate ? new Date(event.eventStartDate).toLocaleDateString() : "Date TBA"}
 										</div>
 									</div>
 									<div className="flex items-center gap-4">
 										<div className="hidden sm:flex flex-col items-end">
 											<span className="text-[12px] text-text-muted">Participants</span>
 											<span className="text-[13px] font-medium text-text-primary">
-												{event.current_participants} {event.max_participants ? `/ ${event.max_participants}` : ""}
+												{event.currentParticipants} {event.maxParticipants ? `/ ${event.maxParticipants}` : ""}
 											</span>
 										</div>
 										<span

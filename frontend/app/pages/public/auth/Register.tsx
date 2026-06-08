@@ -20,8 +20,8 @@ export default function Register() {
 		setValidationErrors({});
 
 		const validationResult = registerSchema.safeParse({
-			first_name: firstName,
-			last_name: lastName,
+			firstName,
+			lastName,
 			organization: org,
 			email,
 			password,
@@ -43,6 +43,9 @@ export default function Register() {
 				alert("Registration successful! Your account is pending admin approval.");
 				navigate("/login");
 			} else {
+				if (data.errors) {
+					setValidationErrors(data.errors);
+				}
 				setError(data.message || "Registration failed");
 			}
 		} catch (err) {
@@ -106,7 +109,7 @@ export default function Register() {
 									onChange={(e) => setFirstName(e.target.value)}
 									className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
-								{validationErrors.first_name && <span className="text-brand text-[11px] mt-1">{validationErrors.first_name}</span>}
+								{validationErrors.firstName && <span className="text-brand text-[11px] mt-1">{validationErrors.firstName}</span>}
 							</div>
 							<div className="flex flex-col gap-2">
 								<label htmlFor="lastName" className="font-mono text-[10px] tracking-[0.1em] uppercase text-text-muted">
@@ -120,7 +123,7 @@ export default function Register() {
 									onChange={(e) => setLastName(e.target.value)}
 									className="bg-transparent border-b border-border-strong pb-2 text-[14px] text-text-primary outline-none focus:border-brand transition-colors"
 								/>
-								{validationErrors.last_name && <span className="text-brand text-[11px] mt-1">{validationErrors.last_name}</span>}
+								{validationErrors.lastName && <span className="text-brand text-[11px] mt-1">{validationErrors.lastName}</span>}
 							</div>
 						</div>
 

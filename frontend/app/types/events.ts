@@ -1,3 +1,12 @@
+export interface Reward {
+	id: number;
+	eventId: number;
+	name: string;
+	points: number;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
 export type Event = {
 	id: number;
 	title: string;
@@ -13,9 +22,11 @@ export type Event = {
 	maxParticipants: number | null;
 	currentParticipants: number;
 	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
+	points?: number;
 	imagePath?: string;
 	createdAt?: string;
 	updatedAt?: string;
+	rewards?: Reward[];
 };
 
 export type CreateEvent = {
@@ -30,6 +41,7 @@ export type CreateEvent = {
 	organizerId: number;
 	maxParticipants: number | null;
 	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
+	points?: number;
 	imagePath?: string;
 	createdAt?: string;
 	updatedAt?: string;
@@ -48,6 +60,7 @@ export type UpdateEvent = {
 	organizerId: number;
 	maxParticipants: number | null;
 	status: "pending" | "approved" | "rejected" | "ongoing" | "completed" | "cancelled";
+	points?: number;
 	imagePath?: string;
 	createdAt?: string;
 	updatedAt?: string;
@@ -61,6 +74,7 @@ export interface Participant {
 	name?: string;
 	email: string;
 	status: string;
+	points?: number;
 }
 
 export interface RegisterEventPayload {

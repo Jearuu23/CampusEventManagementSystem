@@ -12,7 +12,6 @@ header('Content-Type: application/json');
 
 try {
 	$raw_input = file_get_contents("php://input");
-	Logger::log("Login API called. Raw input: " . $raw_input);
 
 	$data = json_decode($raw_input, true);
 
@@ -41,8 +40,8 @@ try {
 	$stmt = $conn->prepare("
 		SELECT
 			id,
-			first_name,
-			last_name,
+			first_name AS firstName,
+			last_name AS lastName,
 			email,
 			password,
 			organization,
@@ -117,8 +116,11 @@ try {
 	$_SESSION["user_id"] = $user["id"];
 	$_SESSION["role"] = $user["role"];
 	$_SESSION["email"] = $user["email"];
+	$_SESSION["firstName"] = $user["firstName"];
+	$_SESSION["lastName"] = $user["lastName"];
+	$_SESSION["organization"] = $user["organization"];
+	$_SESSION["status"] = $user["status"];
 
-	Logger::log("Login successful for email: " . $email);
 	echo json_encode([
 		"success" => true,
 		"message" => "Login successful",

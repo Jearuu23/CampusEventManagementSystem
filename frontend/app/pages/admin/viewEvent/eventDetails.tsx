@@ -15,7 +15,7 @@ export default function EventDetails({ event, participants }: { event: any; part
 					<div className="flex items-center justify-between mb-6">
 						<h3 className="font-mono text-[11px] uppercase text-text-muted tracking-[0.15em]">
 							Participants ({participants?.length || 0}
-							{event.max_participants ? ` / ${event.max_participants}` : ""})
+							{event.maxParticipants ? ` / ${event.maxParticipants}` : ""})
 						</h3>
 					</div>
 
@@ -33,7 +33,7 @@ export default function EventDetails({ event, participants }: { event: any; part
 									{participants.map((p, i) => (
 										<tr key={i} className="border-b border-border last:border-0 hover:bg-surface-secondary/30 transition-colors">
 											<td className="p-4 text-[13px] text-text-primary font-medium">
-												{p.name || [p.first_name, p.last_name].filter(Boolean).join(" ") || "Unknown"}
+												{p.name || [p.firstName, p.lastName].filter(Boolean).join(" ") || "Unknown"}
 											</td>
 											<td className="p-4 text-[13px] text-text-muted">{p.email}</td>
 											<td className="p-4">
@@ -72,12 +72,12 @@ export default function EventDetails({ event, participants }: { event: any; part
 						<li>
 							<span className="block font-mono text-[10px] text-text-muted/70 uppercase tracking-wider mb-1">Capacity</span>
 							<span className="text-[13px] text-text-primary font-medium">
-								{event.max_participants || event.capacity || "Unlimited"}
+								{event.maxParticipants || event.capacity || "Unlimited"}
 							</span>
 						</li>
 						<li>
 							<span className="block font-mono text-[10px] text-text-muted/70 uppercase tracking-wider mb-1">Organizer</span>
-							<span className="text-[13px] text-text-primary font-medium">{event.organizer_name || event.department || "Unknown"}</span>
+							<span className="text-[13px] text-text-primary font-medium">{event.organizerName || event.department || "Unknown"}</span>
 						</li>
 					</ul>
 				</div>

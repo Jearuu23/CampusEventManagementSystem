@@ -1,3 +1,5 @@
+export const APPNAME = "Activo";
+export const FULL_APPNAME = "ACTIVO: A GAMIFIED CAMPUS EVENT MANAGEMENT SYSTEM";
 export const routeLinks = {
 	home: "/",
 	about: "/about",

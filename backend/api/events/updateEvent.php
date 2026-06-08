@@ -24,21 +24,21 @@ if (!Validator::int($data['id'] ?? null)) {
 if (!Validator::string($data['title'] ?? '')) {
 	$errors['title'] = "Title is required.";
 }
-if (empty($data['event_date']) && empty($data['event_start_date'])) {
-	$errors['event_start_date'] = "Event date is required.";
+if (empty($data['eventStartDate'])) { // Assuming eventStartDate is the primary date field
+	$errors['eventStartDate'] = "Event date is required.";
 }
-if (!Validator::int($data['organizer_id'] ?? null)) {
-	$errors['organizer_id'] = "Organizer ID is required.";
+if (!Validator::int($data['organizerId'] ?? null)) {
+	$errors['organizerId'] = "Organizer ID is required.";
 }
-if (!empty($data['max_participants']) && !Validator::int($data['max_participants'])) {
-	$errors['max_participants'] = "Max participants must be a valid number.";
+if (!empty($data['maxParticipants']) && !Validator::int($data['maxParticipants'])) {
+	$errors['maxParticipants'] = "Max participants must be a valid number.";
 }
 
 if (!empty($errors)) {
 	echo json_encode([
 		"success" => false,
 		"message" => "Validation failed",
-		"errors" => $errors
+		"errors" => $errors // Return camelCase error keys
 	]);
 	exit;
 }
@@ -46,14 +46,14 @@ if (!empty($errors)) {
 $id = intval($data["id"]);
 $title = trim($data["title"]);
 $description = isset($data["description"]) ? trim($data["description"]) : null;
-$event_start_date = isset($data["event_start_date"]) ? trim($data["event_start_date"]) : trim($data["event_date"]);
-$event_start_time = isset($data["event_time"]) ? trim($data["event_time"]) : (isset($data["event_start_time"]) ? trim($data["event_start_time"]) : "00:00:00");
-$event_end_date = isset($data["event_end_date"]) ? trim($data["event_end_date"]) : $event_start_date;
-$event_end_time = isset($data["event_end_time"]) ? trim($data["event_end_time"]) : $event_start_time;
+$event_start_date = trim($data["eventStartDate"]);
+$event_start_time = isset($data["eventStartTime"]) ? trim($data["eventStartTime"]) : "00:00:00";
+$event_end_date = isset($data["eventEndDate"]) ? trim($data["eventEndDate"]) : $event_start_date;
+$event_end_time = isset($data["eventEndTime"]) ? trim($data["eventEndTime"]) : $event_start_time;
 $location = isset($data["location"]) ? trim($data["location"]) : null;
-$max_participants = isset($data["max_participants"]) ? intval($data["max_participants"]) : null;
+$max_participants = isset($data["maxParticipants"]) ? intval($data["maxParticipants"]) : null;
 $status = isset($data["status"]) ? trim($data["status"]) : "pending";
-$organizer_id = intval($data["organizer_id"]);
+$organizer_id = intval($data["organizerId"]);
 
 if ($_SESSION["role"] !== "admin" && $_SESSION["user_id"] !== $organizer_id) {
 	echo json_encode([
